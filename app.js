@@ -73,7 +73,7 @@ window.addEventListener("scroll", () => {
     const y = window.scrollY;
     const h = document.documentElement.scrollHeight - window.innerHeight;
     const pct = h > 0 ? (y / h) * 100 : 0;
-    if (progress) progress.style.width = pct + "%";
+    if (progress) progress.style.transform = `scaleX(${pct / 100})`;
     if (navEl) navEl.classList.toggle("scrolled", y > 30);
     if (heroBg && !isMobile) heroBg.style.transform = `translateY(${y * 0.15}px)`;
     ticking = false;

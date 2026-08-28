@@ -42,9 +42,9 @@ h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.5px; text-wrap
   mix-blend-mode: overlay;
 }
 .scroll-progress {
-  position: fixed; top: 0; left: 0; height: 3px; width: 0%;
+  position: fixed; top: 0; left: 0; height: 3px; width: 100%;
   background: linear-gradient(90deg, var(--teal), #2fd0bf); z-index: 40;
-  transition: width 0.1s ease;
+  transform: scaleX(0); transform-origin: left center; will-change: transform;
 }
 /* Symmetrical premium background */
 body::before {
@@ -481,13 +481,13 @@ body[data-theme="dark"] .cursor-glow { background: radial-gradient(circle, rgba(
   .nav-links a { font-size: 16px; padding: 10px 16px; white-space: nowrap; }
   /* Stats: 2x2 on tablet/cp so the 4th stat isn't cut off */
   .stats-row { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  /* Mobile: same background layers as laptop, but FROZEN (no animation = no scroll repaint = no glitch).
-     Only the cheap compositor layers (waves SVG + stripes transform) keep moving. */
+  /* Mobile: same background layers as laptop, but NO blur (blur recomputes every scroll frame = glitch on phones).
+     Gradients still give the aurora look. Frozen + blur-free = zero scroll repaint. */
   .bg-stripes { display: block !important; animation: stripeDrift 30s linear infinite; }
-  .bg-sheen { display: block !important; filter: blur(18px); animation: none !important; }
-  .bg-aurora2 { display: block !important; filter: blur(16px); animation: none !important; }
-  .bg-mesh { display: block !important; filter: blur(14px); animation: none !important; }
-  body::before { display: block !important; animation: none !important; }
+  .bg-sheen { display: block !important; filter: none !important; animation: none !important; }
+  .bg-aurora2 { display: block !important; filter: none !important; animation: none !important; }
+  .bg-mesh { display: block !important; filter: none !important; animation: none !important; }
+  body::before { display: block !important; filter: none !important; animation: none !important; }
   /* Hero: hide blurred aurora + parallax bg on mobile (they repaint during scroll = glitch).
      Fixed bg layers + waves still give the look, smooth scroll. */
   .aurora, .hero-bg { display: none !important; }
