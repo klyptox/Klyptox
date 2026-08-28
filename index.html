@@ -235,29 +235,86 @@
   <script>
     // Self-contained showcase renderer (works even if external JS is sandboxed).
     (function () {
+      // youtube slots carry a "yt" id; others are placeholder "Coming soon" cards.
       var clips = window.KLYPTOX_CLIPS || [
-        { platform: "youtube", url: "", title: "YouTube Shorts showcase 1" },
-        { platform: "youtube", url: "", title: "YouTube Shorts showcase 2" },
-        { platform: "instagram", url: "", title: "Instagram Reels showcase 1" },
-        { platform: "instagram", url: "", title: "Instagram Reels showcase 2" },
-        { platform: "facebook", url: "", title: "Facebook showcase 1" },
-        { platform: "facebook", url: "", title: "Facebook showcase 2" },
-        { platform: "tiktok", url: "", title: "TikTok showcase 1" },
-        { platform: "tiktok", url: "", title: "TikTok showcase 2" }
+        { platform: "youtube", yt: "pQNRSrVbv-U", title: "YouTube Shorts 1" },
+        { platform: "youtube", yt: "", title: "YouTube Shorts 2" },
+        { platform: "instagram", yt: "", title: "Instagram Reels 1" },
+        { platform: "instagram", yt: "", title: "Instagram Reels 2" },
+        { platform: "facebook", yt: "", title: "Facebook 1" },
+        { platform: "facebook", yt: "", title: "Facebook 2" },
+        { platform: "tiktok", yt: "", title: "TikTok 1" },
+        { platform: "tiktok", yt: "", title: "TikTok 2" }
       ];
+      // Build a YouTube embed URL (muted autoplay allowed; jsapi for play/pause control).
+      function ytUrl(id) {
+        return "https://www.youtube.com/embed/" + id + "?autoplay=1&mute=1&playsinline=1&rel=0&modestbranding=1&enablejsapi=1";
+      }
+      // Lazy card: thumbnail first (smooth scroll), iframe injected on first view.
+      function ytCard(c) {
+        var thumb = "https://img.youtube.com/vi/" + c.yt + "/hqdefault.jpg";
+        return '<div class="pf-card" data-yt="' + c.yt + '">' +
+          '<div class="pf-embed"><div class="pf-video-box pf-lazy">' +
+          '<img class="pf-thumb" src="' + thumb + '" alt="' + c.title + '" loading="lazy" />' +
+          '<div class="pf-play">▶</div><span>' + c.title + '</span></div></div>' +
+          '<div class="pf-title">' + c.title + '</div></div>';
+      }
       function ph(title) {
         return '<div class="pf-card"><div class="pf-embed"><div class="pf-placeholder">' +
           '<div class="pf-video-box"><div class="pf-play">▶</div><span>' + title + '</span></div>' +
           '</div></div><div class="pf-title">Coming soon</div></div>';
       }
+      function cardHtml(c) {
+        return c.yt ? ytCard(c) : ph(c.title);
+      }
+      // Lazy-load + IntersectionObserver: play in view, pause when scrolled away.
+      var io = ("IntersectionObserver" in window) ? new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          var card = e.target;
+          var id = card.getAttribute("data-yt");
+          if (!id) return;
+          var box = card.querySelector(".pf-video-box");
+          if (e.isIntersecting) {
+            if (!box.querySelector("iframe")) {
+              box.innerHTML = '<iframe class="pf-iframe" src="' + ytUrl(id) +
+                '" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+            } else {
+              var yt = box.querySelector("iframe").contentWindow;
+              try { yt.postMessage('{"event":"command","func":"playVideo","args":""}', "*"); } catch (err) {}
+            }
+          } else {
+            var f = box.querySelector("iframe");
+            if (f) { try { f.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', "*"); } catch (err) {} }
+          }
+        });
+      }, { threshold: 0.5 }) : null;
       function render(filter) {
         var grid = document.getElementById("portfolio-grid");
         if (!grid) return;
         grid.innerHTML = "";
         grid.classList.toggle("all-view", !filter || filter === "all");
         var shown = (filter && filter !== "all") ? clips.filter(function (c) { return c.platform === filter; }) : clips;
-        shown.forEach(function (c) { grid.insertAdjacentHTML("beforeend", ph(c.title)); });
+        shown.forEach(function (c) {
+          grid.insertAdjacentHTML("beforeend", cardHtml(c));
+          if (io) io.observe(grid.lastElementChild);
+        });
       }
+      // Click a lazy card to force-load immediately (with sound).
+      var grid = document.getElementById("portfolio-grid");
+      if (grid) {
+        grid.addEventListener("click", function (e) {
+          var card = e.target.closest(".pf-card[data-yt]");
+          if (!card) return;
+          var box = card.querySelector(".pf-video-box");
+          var id = card.getAttribute("data-yt");
+          if (box && id && !box.querySelector("iframe")) {
+            box.innerHTML = '<iframe class="pf-iframe" src="' + ytUrl(id).replace("mute=1", "mute=0") +
+              '" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+          }
+        });
+      }
+      render("all");
+      // Filter buttons (All / YouTube / Instagram / TikTok / Facebook)
       var bar = document.querySelector(".filter-bar");
       if (bar) {
         bar.addEventListener("click", function (e) {
@@ -268,7 +325,6 @@
           render(btn.dataset.filter);
         });
       }
-      render("all");
     })();
   </script>
   <script src="app.js?v=3"></script>

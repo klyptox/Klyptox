@@ -371,8 +371,14 @@ body[data-theme="dark"] .pf-card .pf-placeholder { color: var(--muted-dark); }
 .pf-video-box {
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
   width: 100%; height: 100%; border: 2px dashed var(--border-light); border-radius: 10px;
-  color: var(--muted-light); position: relative; transition: border-color 0.3s ease;
+  color: var(--muted-light); position: relative; transition: border-color 0.3s ease; overflow: hidden;
 }
+/* YouTube lazy cards: thumbnail + iframe fill the box, play button overlays */
+.pf-video-box.pf-lazy { border-style: solid; border-color: var(--border-light); padding: 0; }
+.pf-thumb { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+.pf-video-box.pf-lazy .pf-play { position: absolute; z-index: 2; }
+.pf-video-box.pf-lazy span { position: absolute; bottom: 8px; left: 0; right: 0; z-index: 2; font-size: 12px; text-shadow: 0 1px 4px rgba(0,0,0,0.6); color: #fff; }
+.pf-iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; z-index: 3; }
 .pf-card:hover .pf-video-box { border-color: var(--teal); }
 body[data-theme="dark"] .pf-video-box { border-color: var(--border-dark); color: var(--muted-dark); }
 .pf-play {
