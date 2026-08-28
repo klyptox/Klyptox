@@ -27,7 +27,7 @@ toggle.addEventListener("click", () => {
   const next = body.getAttribute("data-theme") === "dark" ? "light" : "dark";
   if (fade) {
     fade.classList.add("go");
-    setTimeout(() => fade.classList.remove("go"), 350);
+    setTimeout(() => fade.classList.remove("go"), 240);
   }
   setTheme(next);
 });
@@ -61,22 +61,22 @@ reveals.forEach((r) => io.observe(r));
 
 // Scroll progress bar
 const progress = document.getElementById("scrollProgress");
-// Nav shrink on scroll
+// Nav shrink + progress + hero parallax (throttled with rAF to avoid jank)
 const navEl = document.querySelector(".nav");
-window.addEventListener("scroll", () => {
-  const y = window.scrollY;
-  const h = document.documentElement.scrollHeight - window.innerHeight;
-  const pct = h > 0 ? (y / h) * 100 : 0;
-  if (progress) progress.style.width = pct + "%";
-  if (navEl) navEl.classList.toggle("scrolled", y > 30);
-  // parallax background layers
-  document.body.style.setProperty("--scrollY", y + "px");
-}, { passive: true });
-
-// Subtle hero parallax
 const heroBg = document.getElementById("heroBg");
+let ticking = false;
 window.addEventListener("scroll", () => {
-  if (heroBg) heroBg.style.transform = `translateY(${window.scrollY * 0.15}px)`;
+  if (ticking) return;
+  ticking = true;
+  requestAnimationFrame(() => {
+    const y = window.scrollY;
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = h > 0 ? (y / h) * 100 : 0;
+    if (progress) progress.style.width = pct + "%";
+    if (navEl) navEl.classList.toggle("scrolled", y > 30);
+    if (heroBg) heroBg.style.transform = `translateY(${y * 0.15}px)`;
+    ticking = false;
+  });
 }, { passive: true });
 
 // Subtle cursor glow (desktop only)
