@@ -79,7 +79,7 @@ body[data-theme="dark"]::before {
     radial-gradient(40% 50% at 12% 18%, rgba(15,155,142,0.10), transparent 70%),
     radial-gradient(45% 55% at 88% 22%, rgba(47,208,191,0.08), transparent 70%),
     radial-gradient(50% 50% at 80% 85%, rgba(15,155,142,0.09), transparent 70%);
-  filter: blur(40px);
+  filter: blur(20px);
 }
 .bg-aurora2 {
   position: fixed; inset: -25%; z-index: -2; pointer-events: none;
@@ -87,7 +87,7 @@ body[data-theme="dark"]::before {
     radial-gradient(circle at 70% 75%, rgba(47,208,191,0.18), transparent 50%),
     radial-gradient(circle at 15% 60%, rgba(15,155,142,0.20), transparent 52%),
     radial-gradient(circle at 60% 10%, rgba(15,155,142,0.14), transparent 48%);
-  filter: blur(50px);
+  filter: blur(28px);
   animation: auroraDrift2 34s cubic-bezier(.45,.05,.55,.95) infinite alternate, auroraPulse 12s ease-in-out infinite;
   will-change: transform, opacity;
 }
@@ -100,7 +100,7 @@ body[data-theme="dark"]::before {
 .bg-sheen {
   position: fixed; inset: -40%; z-index: -2; pointer-events: none;
   background: conic-gradient(from 0deg at 50% 50%, rgba(15,155,142,0) 0deg, rgba(47,208,191,0.10) 60deg, rgba(15,155,142,0) 140deg, rgba(15,155,142,0) 220deg, rgba(47,208,191,0.08) 300deg, rgba(15,155,142,0) 360deg);
-  filter: blur(60px);
+  filter: blur(34px);
   animation: sheenSpin 80s linear infinite;
   will-change: transform, opacity;
 }
@@ -123,7 +123,7 @@ body::after {
 @keyframes tessMove { from { background-position: 0 0; } to { background-position: 80px 40px; } }
 .bg-waves {
   position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  opacity: var(--grid-alpha);
+  opacity: calc(var(--grid-alpha) + 0.06);
   -webkit-mask-image: radial-gradient(130% 120% at 50% 25%, #000 45%, transparent 100%);
   mask-image: radial-gradient(130% 120% at 50% 25%, #000 45%, transparent 100%);
 }
