@@ -121,6 +121,13 @@ body::after {
 }
 @keyframes stripeDrift { from { transform: translate3d(0,0,0); } to { transform: translate3d(-260px,-260px,0); } }
 @keyframes tessMove { from { background-position: 0 0; } to { background-position: 80px 40px; } }
+.bg-waves {
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  opacity: var(--grid-alpha);
+  -webkit-mask-image: radial-gradient(130% 120% at 50% 25%, #000 45%, transparent 100%);
+  mask-image: radial-gradient(130% 120% at 50% 25%, #000 45%, transparent 100%);
+}
+body[data-theme="dark"] .bg-waves { opacity: calc(var(--grid-alpha) + 0.06); }
 body[data-theme="dark"] .bg-stripes { opacity: calc(var(--grid-alpha) + 0.05); }
 body[data-theme="dark"] {
   background-color: #083a38;
@@ -467,19 +474,19 @@ body[data-theme="dark"] .cursor-glow { background: radial-gradient(circle, rgba(
     transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.4s ease;
   }
   body[data-theme="dark"] .nav-links { background: var(--bg-dark); border-color: var(--border-dark); }
-  .nav-links.open { max-height: 420px; opacity: 1; padding: 14px 24px; gap: 10px; }
-  .nav-links.open a { padding: 12px 16px; }
+  .nav-links.open { max-height: 460px; opacity: 1; padding: 18px 24px; gap: 16px; }
+  .nav-links.open a { padding: 14px 18px; font-size: 17px; }
   /* Stats: kill backdrop blur on mobile (repaint glitch), use solid bg */
   .stat { backdrop-filter: none; background: rgba(255,255,255,0.92); }
   .nav-links a { font-size: 16px; padding: 10px 16px; white-space: nowrap; }
   /* Stats: 2x2 on tablet/cp so the 4th stat isn't cut off */
   .stats-row { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  /* Mobile performance: freeze expensive background animations (kill scroll glitch) */
-  .bg-sheen, .bg-aurora2 { animation: none !important; filter: blur(30px); }
-  .bg-stripes { animation: none !important; }
-  .bg-mesh, body::before { animation: none !important; }
+  /* Mobile performance: disable expensive blurred fixed layers (kill scroll glitch) */
+  .bg-sheen, .bg-aurora2 { display: none !important; }
+  .bg-mesh, body::before { display: none !important; }
+  .bg-stripes { display: none !important; }
   /* Hero aurora blobs: freeze + kill blend + lighten blur (main home-glitch source on phones) */
-  .aurora { opacity: 0.55; }
-  .aurora-blob { animation: none !important; filter: blur(28px); mix-blend-mode: normal; }
+  .aurora { opacity: 0.5; }
+  .aurora-blob { animation: none !important; filter: blur(24px); mix-blend-mode: normal; }
   .nav { position: relative; }
 }
