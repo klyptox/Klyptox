@@ -256,7 +256,8 @@
         return '<div class="pf-card" data-yt="' + c.yt + '">' +
           '<div class="pf-embed"><div class="pf-video-box pf-lazy">' +
           '<img class="pf-thumb" src="' + thumb + '" alt="' + c.title + '" loading="lazy" />' +
-          '<div class="pf-play">▶</div><span>' + c.title + '</span></div></div>' +
+          '<div class="pf-play">▶</div><span>' + c.title + '</span>' +
+          '<span class="pf-sound-hint">🔊 tap for sound</span></div></div>' +
           '<div class="pf-title">' + c.title + '</div></div>';
       }
       function ph(title) {
@@ -267,10 +268,12 @@
       function cardHtml(c) {
         return c.yt ? ytCard(c) : ph(c.title);
       }
-      // Lazy-load + IntersectionObserver: play in view, pause when scrolled away.
+      // Lazy-load + IntersectionObserver: autoplay (muted) in view, pause when scrolled away.
+      // Manual click opens with SOUND and locks the card (observer won't touch it after).
       var io = ("IntersectionObserver" in window) ? new IntersectionObserver(function (entries) {
         entries.forEach(function (e) {
           var card = e.target;
+          if (card.getAttribute("data-opened")) return; // user took over
           var id = card.getAttribute("data-yt");
           if (!id) return;
           var box = card.querySelector(".pf-video-box");
@@ -299,7 +302,7 @@
           if (io) io.observe(grid.lastElementChild);
         });
       }
-      // Click a lazy card to force-load immediately (with sound).
+      // Click a card: open WITH SOUND (user gesture). Replace any existing muted iframe.
       var grid = document.getElementById("portfolio-grid");
       if (grid) {
         grid.addEventListener("click", function (e) {
@@ -307,7 +310,8 @@
           if (!card) return;
           var box = card.querySelector(".pf-video-box");
           var id = card.getAttribute("data-yt");
-          if (box && id && !box.querySelector("iframe")) {
+          if (box && id) {
+            card.setAttribute("data-opened", "1");
             box.innerHTML = '<iframe class="pf-iframe" src="' + ytUrl(id).replace("mute=1", "mute=0") +
               '" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
           }
