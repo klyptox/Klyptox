@@ -481,14 +481,15 @@ body[data-theme="dark"] .cursor-glow { background: radial-gradient(circle, rgba(
   .nav-links a { font-size: 16px; padding: 10px 16px; white-space: nowrap; }
   /* Stats: 2x2 on tablet/cp so the 4th stat isn't cut off */
   .stats-row { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  /* Mobile: keep same background layers as laptop but lightweight (no heavy blur = no glitch) */
-  .bg-stripes { display: block !important; animation: stripeDrift 24s cubic-bezier(.37,0,.63,1) infinite; }
-  .bg-sheen { display: block !important; filter: blur(22px); }
-  .bg-aurora2 { display: block !important; filter: blur(20px); }
-  .bg-mesh { display: block !important; filter: blur(16px); }
-  body::before { display: block !important; }
-  /* Hero aurora blobs: lighten blur + kill blend (smooth on phones) */
+  /* Mobile: same background layers as laptop, but FROZEN (no animation = no scroll repaint = no glitch).
+     Only the cheap compositor layers (waves SVG + stripes transform) keep moving. */
+  .bg-stripes { display: block !important; animation: stripeDrift 30s linear infinite; }
+  .bg-sheen { display: block !important; filter: blur(18px); animation: none !important; }
+  .bg-aurora2 { display: block !important; filter: blur(16px); animation: none !important; }
+  .bg-mesh { display: block !important; filter: blur(14px); animation: none !important; }
+  body::before { display: block !important; animation: none !important; }
+  /* Hero aurora blobs: static + light blur (smooth on phones) */
   .aurora { opacity: 0.5; }
-  .aurora-blob { animation: none !important; filter: blur(20px); mix-blend-mode: normal; }
+  .aurora-blob { animation: none !important; filter: blur(16px); mix-blend-mode: normal; }
   .nav { position: relative; }
 }
