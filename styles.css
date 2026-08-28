@@ -488,8 +488,8 @@ body[data-theme="dark"] .cursor-glow { background: radial-gradient(circle, rgba(
   .bg-aurora2 { display: block !important; filter: blur(16px); animation: none !important; }
   .bg-mesh { display: block !important; filter: blur(14px); animation: none !important; }
   body::before { display: block !important; animation: none !important; }
-  /* Hero aurora blobs: static + light blur (smooth on phones) */
-  .aurora { opacity: 0.5; }
-  .aurora-blob { animation: none !important; filter: blur(16px); mix-blend-mode: normal; }
+  /* Hero: hide blurred aurora + parallax bg on mobile (they repaint during scroll = glitch).
+     Fixed bg layers + waves still give the look, smooth scroll. */
+  .aurora, .hero-bg { display: none !important; }
   .nav { position: relative; }
 }

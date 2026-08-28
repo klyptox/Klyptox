@@ -64,6 +64,7 @@ const progress = document.getElementById("scrollProgress");
 // Nav shrink + progress + hero parallax (throttled with rAF to avoid jank)
 const navEl = document.querySelector(".nav");
 const heroBg = document.getElementById("heroBg");
+const isMobile = window.matchMedia("(max-width: 820px)").matches;
 let ticking = false;
 window.addEventListener("scroll", () => {
   if (ticking) return;
@@ -74,7 +75,7 @@ window.addEventListener("scroll", () => {
     const pct = h > 0 ? (y / h) * 100 : 0;
     if (progress) progress.style.width = pct + "%";
     if (navEl) navEl.classList.toggle("scrolled", y > 30);
-    if (heroBg) heroBg.style.transform = `translateY(${y * 0.15}px)`;
+    if (heroBg && !isMobile) heroBg.style.transform = `translateY(${y * 0.15}px)`;
     ticking = false;
   });
 }, { passive: true });
