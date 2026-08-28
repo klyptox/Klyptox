@@ -443,6 +443,7 @@ body[data-theme="dark"] .cursor-glow { background: radial-gradient(circle, rgba(
 @media (max-width: 1024px) {
   .grid-3 { grid-template-columns: 1fr 1fr; }
   .portfolio-grid { grid-template-columns: repeat(3, 1fr); }
+  .stats-row { grid-template-columns: repeat(2, 1fr); gap: 12px; }
 }
 
 @media (max-width: 820px) {
@@ -463,9 +464,14 @@ body[data-theme="dark"] .cursor-glow { background: radial-gradient(circle, rgba(
   body[data-theme="dark"] .nav-links { background: var(--bg-dark); border-color: var(--border-dark); }
   .nav-links.open { max-height: 360px; opacity: 1; padding: 12px 24px; }
   .nav-links a { font-size: 16px; padding: 10px 16px; white-space: nowrap; }
+  /* Stats: 2x2 on tablet/cp so the 4th stat isn't cut off */
+  .stats-row { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   /* Mobile performance: freeze expensive background animations (kill scroll glitch) */
   .bg-sheen, .bg-aurora2 { animation: none !important; filter: blur(30px); }
   .bg-stripes { animation: none !important; }
   .bg-mesh, body::before { animation: none !important; }
+  /* Hero aurora blobs: freeze + kill blend + lighten blur (main home-glitch source on phones) */
+  .aurora { opacity: 0.55; }
+  .aurora-blob { animation: none !important; filter: blur(28px); mix-blend-mode: normal; }
   .nav { position: relative; }
 }
