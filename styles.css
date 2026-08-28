@@ -121,6 +121,7 @@ body::after {
 }
 @keyframes stripeDrift { from { transform: translate3d(0,0,0); } to { transform: translate3d(-260px,-260px,0); } }
 @keyframes tessMove { from { background-position: 0 0; } to { background-position: 80px 40px; } }
+@keyframes waveSlide { from { transform: translate3d(0,0,0); } to { transform: translate3d(-220px,0,0); } }
 .bg-waves {
   position: fixed; inset: 0; z-index: -1; pointer-events: none;
   opacity: calc(var(--grid-alpha) + 0.06);
@@ -491,5 +492,16 @@ body[data-theme="dark"] .cursor-glow { background: radial-gradient(circle, rgba(
   /* Hero: hide blurred aurora + parallax bg on mobile (they repaint during scroll = glitch).
      Fixed bg layers + waves still give the look, smooth scroll. */
   .aurora, .hero-bg { display: none !important; }
+  /* Kill all repaint triggers on mobile for smooth scroll:
+     - nav/hero backdrop-filter re-composites every scroll frame
+     - will-change on many layers = GPU memory pressure on weak phones
+     - waves SMIL can repaint on some mobile browsers -> use cheap CSS transform drift instead */
+  .nav { backdrop-filter: none !important; background: rgba(255,255,255,0.96); }
+  body[data-theme="dark"] .nav { background: rgba(14,20,22,0.96); }
+  .hero-inner { backdrop-filter: none !important; background: rgba(255,255,255,0.7); }
+  body[data-theme="dark"] .hero-inner { background: rgba(14,20,22,0.7); }
+  body::before, .bg-aurora2, .bg-sheen, .bg-mesh, .bg-stripes, .scroll-progress { will-change: auto !important; }
+  .bg-waves { animation: none !important; }
+  .bg-waves svg { animation: waveSlide 40s linear infinite; }
   .nav { position: relative; }
 }
