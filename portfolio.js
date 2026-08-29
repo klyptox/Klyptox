@@ -15,8 +15,8 @@
 
 const clips = [
   // ---- PLACEHOLDER CARDS (remove these once real clips are added) ----
-  // YouTube Shorts (slot 1 has a real sample)
-  { platform: "youtube", yt: "pQNRSrVbv-U", title: "YouTube Shorts 1" },
+  // YouTube Shorts (slot 1 — set mp4 when you have the file; no YouTube embeds)
+  { platform: "youtube", mp4: "", title: "YouTube Shorts 1" },
   { platform: "youtube", mp4: "", title: "YouTube Shorts 2" },
   // Instagram Reels
   { platform: "instagram", mp4: "", title: "Instagram Reels 1" },
