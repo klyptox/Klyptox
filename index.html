@@ -256,6 +256,7 @@
         return '<div class="pf-card" data-yt="' + c.yt + '">' +
           '<div class="pf-embed"><div class="pf-video-box pf-lazy">' +
           '<img class="pf-thumb" src="' + thumb + '" alt="' + c.title + '" loading="lazy" />' +
+          '<button class="pf-mute-btn" type="button" aria-label="Toggle sound">🔇</button>' +
           '<div class="pf-play">▶</div><span>' + c.title + '</span>' +
           '<span class="pf-sound-hint">🔊 tap for sound</span></div></div>' +
           '<div class="pf-title">' + c.title + '</div></div>';
@@ -300,6 +301,30 @@
         shown.forEach(function (c) {
           grid.insertAdjacentHTML("beforeend", cardHtml(c));
           if (io) io.observe(grid.lastElementChild);
+        });
+      }
+      // Mute/unmute button: toggle sound on the loaded iframe (stops propagation so card doesn't also open).
+      if (grid) {
+        grid.addEventListener("click", function (e) {
+          var btn = e.target.closest(".pf-mute-btn");
+          if (!btn) return;
+          e.stopPropagation();
+          var card = btn.closest(".pf-card[data-yt]");
+          var f = card && card.querySelector("iframe");
+          if (!f) {
+            // No iframe yet: open with sound first.
+            var box = card.querySelector(".pf-video-box");
+            var id = card.getAttribute("data-yt");
+            card.setAttribute("data-opened", "1");
+            box.innerHTML = '<iframe class="pf-iframe" src="' + ytUrl(id).replace("mute=1", "mute=0") +
+              '" frameborder="0" webkit-playsinline="1" playsinline="1" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+            btn.textContent = "🔊";
+            return;
+          }
+          window.__pfMuted = !window.__pfMuted;
+          var fn = window.__pfMuted ? "mute" : "unMute";
+          try { f.contentWindow.postMessage('{"event":"command","func":"' + fn + '","args":""}', "*"); } catch (err) {}
+          btn.textContent = window.__pfMuted ? "🔇" : "🔊";
         });
       }
       // Click a card: open WITH SOUND (user gesture). Replace any existing muted iframe,

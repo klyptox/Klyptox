@@ -244,6 +244,8 @@ body[data-theme="dark"] .hero { background: #0e1416; }
 body[data-theme="dark"] .hero-inner { background: rgba(14,20,22,0.55); }
 .hero-logo { font-family: var(--font-display); font-size: 22px; letter-spacing: 6px; color: var(--teal); font-weight: 700; margin-bottom: 18px; }
 .nav-logo { height: 34px; width: auto; display: block; }
+/* Light mode: dark chip behind logo so it shows like dark mode (logo has white parts that vanish on white) */
+body[data-theme="light"] .nav-logo { background: #083a38; padding: 4px 8px; border-radius: 8px; }
 .hero-logo-img { height: 96px; width: auto; margin-bottom: 14px; }
 .footer-logo { height: 44px; width: auto; margin-bottom: 10px; }
 .hero-tagline {
@@ -380,6 +382,7 @@ body[data-theme="dark"] .pf-card .pf-placeholder { color: var(--muted-dark); }
 .pf-video-box.pf-lazy span { position: absolute; bottom: 8px; left: 0; right: 0; z-index: 2; font-size: 12px; text-shadow: 0 1px 4px rgba(0,0,0,0.6); color: #fff; }
 .pf-sound-hint { top: 8px !important; bottom: auto !important; font-size: 11px !important; opacity: 0.9; }
 .pf-iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; z-index: 3; }
+.pf-mute-btn { position: absolute; top: 8px; right: 8px; z-index: 4; width: 34px; height: 34px; border: none; border-radius: 50%; background: rgba(0,0,0,0.55); color: #fff; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .pf-card:hover .pf-video-box { border-color: var(--teal); }
 body[data-theme="dark"] .pf-video-box { border-color: var(--border-dark); color: var(--muted-dark); }
 .pf-play {
