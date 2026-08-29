@@ -248,15 +248,16 @@
       ];
       // Build a YouTube embed URL (muted autoplay allowed; jsapi for play/pause control).
       function ytUrl(id) {
-        return "https://www.youtube.com/embed/" + id + "?autoplay=1&mute=1&playsinline=1&rel=0&modestbranding=1&enablejsapi=1";
+        return "https://www.youtube.com/embed/" + id + "?autoplay=1&mute=1&controls=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1";
       }
       // Lazy card: thumbnail first (smooth scroll), iframe injected on first view.
       function ytCard(c) {
         var thumb = "https://img.youtube.com/vi/" + c.yt + "/hqdefault.jpg";
         return '<div class="pf-card" data-yt="' + c.yt + '">' +
-          '<div class="pf-embed"><div class="pf-video-box pf-lazy">' +
-          '<img class="pf-thumb" src="' + thumb + '" alt="' + c.title + '" loading="lazy" />' +
+          '<div class="pf-embed">' +
           '<button class="pf-mute-btn" type="button" aria-label="Toggle sound">🔇</button>' +
+          '<div class="pf-video-box pf-lazy">' +
+          '<img class="pf-thumb" src="' + thumb + '" alt="' + c.title + '" loading="lazy" />' +
           '<div class="pf-play">▶</div><span>' + c.title + '</span>' +
           '<span class="pf-sound-hint">🔊 tap for sound</span></div></div>' +
           '<div class="pf-title">' + c.title + '</div></div>';
