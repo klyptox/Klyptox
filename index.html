@@ -285,12 +285,11 @@
         if (c.mp4) return mp4Card(c);
         return ph(c.title);
       }
-      // Lazy-load + IntersectionObserver: autoplay (muted) in view, pause when scrolled away.
-      // Manual click opens with SOUND and locks the card (observer won't touch it after).
+      // IntersectionObserver: autoplay when in view, ALWAYS pause when scrolled away
+      // (even if the user tapped for sound). This keeps videos from running off-screen.
       var io = ("IntersectionObserver" in window) ? new IntersectionObserver(function (entries) {
         entries.forEach(function (e) {
           var card = e.target;
-          if (card.getAttribute("data-opened")) return; // user took over
           var id = card.getAttribute("data-yt");
           var mp4 = card.getAttribute("data-mp4");
           var box = card.querySelector(".pf-video-box");
@@ -299,8 +298,7 @@
             var vid = box.querySelector("video");
             if (!vid) return;
             if (e.isIntersecting) {
-              if (!vid.src) { vid.src = vid.getAttribute("data-src"); }
-              if (vid.paused) { vid.muted = true; try { vid.play(); } catch (err) {} }
+              if (vid.paused) { try { vid.play(); } catch (err) {} }
             } else {
               if (!vid.paused) { try { vid.pause(); } catch (err) {} }
             }
@@ -318,7 +316,7 @@
             try { f.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', "*"); } catch (err) {}
           }
         });
-      }, { threshold: 0.5 }) : null;
+      }, { threshold: 0.25 }) : null;
       function render(filter) {
         var grid = document.getElementById("portfolio-grid");
         if (!grid) return;
@@ -374,7 +372,7 @@
           if (muteBtn) muteBtn.textContent = "🔊";
           if (isMp4) {
             var v = box.querySelector("video");
-            if (v && !v.src) { v.src = v.getAttribute("data-src"); }
+            if (v && !v.src) { v.src = "videos/"; }
             if (v) { v.muted = false; try { v.play(); } catch (err) {} }
           } else {
             var ytId = card.getAttribute("data-yt");
