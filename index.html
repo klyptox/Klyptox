@@ -302,7 +302,8 @@
           if (io) io.observe(grid.lastElementChild);
         });
       }
-      // Click a card: open WITH SOUND (user gesture). Replace any existing muted iframe.
+      // Click a card: open WITH SOUND (user gesture). Replace any existing muted iframe,
+      // or unMute the one already auto-loaded. Locks the card (observer won't touch it).
       var grid = document.getElementById("portfolio-grid");
       if (grid) {
         grid.addEventListener("click", function (e) {
@@ -310,10 +311,17 @@
           if (!card) return;
           var box = card.querySelector(".pf-video-box");
           var id = card.getAttribute("data-yt");
-          if (box && id) {
-            card.setAttribute("data-opened", "1");
+          if (!box || !id) return;
+          card.setAttribute("data-opened", "1");
+          var f = box.querySelector("iframe");
+          if (f) {
+            try {
+              f.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', "*");
+              f.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', "*");
+            } catch (err) {}
+          } else {
             box.innerHTML = '<iframe class="pf-iframe" src="' + ytUrl(id).replace("mute=1", "mute=0") +
-              '" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+              '" frameborder="0" webkit-playsinline="1" playsinline="1" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
           }
         });
       }

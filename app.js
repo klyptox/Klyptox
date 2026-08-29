@@ -31,7 +31,7 @@ toggle.addEventListener("click", () => {
   }
   setTheme(next);
 });
-try { setTheme(localStorage.getItem("klyptox-theme") || "light"); } catch (e) { setTheme("light"); }
+try { setTheme(localStorage.getItem("klyptox-theme") || "dark"); } catch (e) { setTheme("dark"); }
 
 // Assign alternating directional reveal to grid cards for layered scroll motion
 document.querySelectorAll(".grid-2, .grid-3").forEach((grid) => {
