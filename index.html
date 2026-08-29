@@ -264,13 +264,26 @@
           '<span class="pf-sound-hint">🔊 tap for sound</span></div></div>' +
           '<div class="pf-title">' + c.title + '</div></div>';
       }
+      // Self-hosted MP4: native <video>, NO view count, NO YouTube branding.
+      function mp4Card(c) {
+        return '<div class="pf-card" data-mp4="videos/' + c.mp4 + '">' +
+          '<div class="pf-embed">' +
+          '<button class="pf-mute-btn" type="button" aria-label="Toggle sound">🔇</button>' +
+          '<div class="pf-video-box pf-lazy">' +
+          '<video class="pf-video" preload="metadata" muted loop playsinline webkit-playsinline src="videos/' + c.mp4 + '"></video>' +
+          '<div class="pf-play">▶</div><span>' + c.title + '</span>' +
+          '<span class="pf-sound-hint">🔊 tap for sound</span></div></div>' +
+          '<div class="pf-title">' + c.title + '</div></div>';
+      }
       function ph(title) {
         return '<div class="pf-card"><div class="pf-embed"><div class="pf-placeholder">' +
           '<div class="pf-video-box"><div class="pf-play">▶</div><span>' + title + '</span></div>' +
           '</div></div><div class="pf-title">Coming soon</div></div>';
       }
       function cardHtml(c) {
-        return c.yt ? ytCard(c) : ph(c.title);
+        if (c.yt) return ytCard(c);
+        if (c.mp4) return mp4Card(c);
+        return ph(c.title);
       }
       // Lazy-load + IntersectionObserver: autoplay (muted) in view, pause when scrolled away.
       // Manual click opens with SOUND and locks the card (observer won't touch it after).
