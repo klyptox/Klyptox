@@ -4,30 +4,29 @@
 //    1. Copy a block below (between the { } braces)
 //    2. Paste it as a new item in the array
 //    3. Set platform: "youtube" | "tiktok" | "instagram" | "facebook"
-//    4. Paste the clip URL into "url"
+//    4. For a YouTube clip: set  yt: "VIDEO_ID"   (the part after /shorts/ or v=)
+//       For a self-hosted MP4:  set  mp4: "clip1.mp4"  (file in /videos folder)
 //    5. Tell Jerald/Hermes to rebuild, or commit & redeploy
 //
-//  Supported URL formats:
-//    youtube : https://youtube.com/shorts/XXXX  or  https://youtu.be/XXXX
-//    tiktok  : https://www.tiktok.com/@user/video/XXXX
-//    instagram: https://www.instagram.com/reel/XXXX
-//    facebook : https://www.facebook.com/USER/videos/XXXX
+//  MP4 notes: drop files in the /videos folder (e.g. videos/clip1.mp4).
+//  No view count, no YouTube branding, client sees only your edit quality.
+//  Keep files ~30-50MB, 9:16, 720p for fast mobile load.
 // ============================================================
 
 const clips = [
   // ---- PLACEHOLDER CARDS (remove these once real clips are added) ----
-  // YouTube Shorts (2)
-  { platform: "youtube", url: "", title: "YouTube Shorts showcase 1" },
-  { platform: "youtube", url: "", title: "YouTube Shorts showcase 2" },
-  // Instagram Reels (2)
-  { platform: "instagram", url: "", title: "Instagram Reels showcase 1" },
-  { platform: "instagram", url: "", title: "Instagram Reels showcase 2" },
-  // Facebook (2)
-  { platform: "facebook", url: "", title: "Facebook showcase 1" },
-  { platform: "facebook", url: "", title: "Facebook showcase 2" },
-  // TikTok (2)
-  { platform: "tiktok", url: "", title: "TikTok showcase 1" },
-  { platform: "tiktok", url: "", title: "TikTok showcase 2" },
+  // YouTube Shorts (slot 1 has a real sample)
+  { platform: "youtube", yt: "pQNRSrVbv-U", title: "YouTube Shorts 1" },
+  { platform: "youtube", mp4: "", title: "YouTube Shorts 2" },
+  // Instagram Reels
+  { platform: "instagram", mp4: "", title: "Instagram Reels 1" },
+  { platform: "instagram", mp4: "", title: "Instagram Reels 2" },
+  // Facebook
+  { platform: "facebook", mp4: "", title: "Facebook 1" },
+  { platform: "facebook", mp4: "", title: "Facebook 2" },
+  // TikTok
+  { platform: "tiktok", mp4: "", title: "TikTok 1" },
+  { platform: "tiktok", mp4: "", title: "TikTok 2" },
   // --------------------------------------------------------------------
 ];
 

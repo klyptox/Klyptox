@@ -235,16 +235,16 @@
   <script>
     // Self-contained showcase renderer (works even if external JS is sandboxed).
     (function () {
-      // youtube slots carry a "yt" id; others are placeholder "Coming soon" cards.
+      // youtube slots carry "yt" id; mp4 slots carry "mp4" filename (in /videos). Others = placeholder.
       var clips = window.KLYPTOX_CLIPS || [
         { platform: "youtube", yt: "pQNRSrVbv-U", title: "YouTube Shorts 1" },
-        { platform: "youtube", yt: "", title: "YouTube Shorts 2" },
-        { platform: "instagram", yt: "", title: "Instagram Reels 1" },
-        { platform: "instagram", yt: "", title: "Instagram Reels 2" },
-        { platform: "facebook", yt: "", title: "Facebook 1" },
-        { platform: "facebook", yt: "", title: "Facebook 2" },
-        { platform: "tiktok", yt: "", title: "TikTok 1" },
-        { platform: "tiktok", yt: "", title: "TikTok 2" }
+        { platform: "youtube", mp4: "", title: "YouTube Shorts 2" },
+        { platform: "instagram", mp4: "", title: "Instagram Reels 1" },
+        { platform: "instagram", mp4: "", title: "Instagram Reels 2" },
+        { platform: "facebook", mp4: "", title: "Facebook 1" },
+        { platform: "facebook", mp4: "", title: "Facebook 2" },
+        { platform: "tiktok", mp4: "", title: "TikTok 1" },
+        { platform: "tiktok", mp4: "", title: "TikTok 2" }
       ];
       // Hide YouTube chrome entirely (controls=0 => no CC button, no channel overlay).
       function ytUrl(id, withSound) {
@@ -279,19 +279,25 @@
           var card = e.target;
           if (card.getAttribute("data-opened")) return; // user took over
           var id = card.getAttribute("data-yt");
-          if (!id) return;
+          var mp4 = card.getAttribute("data-mp4");
           var box = card.querySelector(".pf-video-box");
+          if (!mp4 && !id) return;
+          if (mp4) {
+            var vid = box.querySelector("video");
+            if (e.isIntersecting) { if (vid && vid.paused) { try { vid.play(); } catch (err) {} } }
+            else { if (vid && !vid.paused) { try { vid.pause(); } catch (err) {} } }
+            return;
+          }
+          var f = box.querySelector("iframe");
           if (e.isIntersecting) {
-            if (!box.querySelector("iframe")) {
+            if (!f) {
               box.innerHTML = '<iframe class="pf-iframe" src="' + ytUrl(id, false) +
                 '" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
             } else {
-              var yt = box.querySelector("iframe").contentWindow;
-              try { yt.postMessage('{"event":"command","func":"playVideo","args":""}', "*"); } catch (err) {}
+              try { f.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', "*"); } catch (err) {}
             }
-          } else {
-            var f = box.querySelector("iframe");
-            if (f) { try { f.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', "*"); } catch (err) {} }
+          } else if (f) {
+            try { f.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', "*"); } catch (err) {}
           }
         });
       }, { threshold: 0.5 }) : null;
@@ -307,44 +313,63 @@
         });
       }
       // Single delegated click handler: mute button toggles sound; tapping card opens with sound.
-      // Uses data-muted on the card so the 🔇/🔊 symbol always reflects real state.
+      // Handles both YouTube (data-yt) and self-hosted MP4 (data-mp4) cards.
       var grid = document.getElementById("portfolio-grid");
       if (grid) {
         grid.addEventListener("click", function (e) {
-          var card = e.target.closest(".pf-card[data-yt]");
+          var card = e.target.closest(".pf-card[data-yt], .pf-card[data-mp4]");
           if (!card) return;
           var box = card.querySelector(".pf-video-box");
-          var id = card.getAttribute("data-yt");
-          var f = box.querySelector("iframe");
           var muteBtn = card.querySelector(".pf-mute-btn");
+          var isMp4 = !!card.getAttribute("data-mp4");
+
           if (e.target.closest(".pf-mute-btn")) {
             card.setAttribute("data-opened", "1");
-            if (!f) {
-              box.innerHTML = '<iframe class="pf-iframe" src="' + ytUrl(id, true) +
-                '" frameborder="0" webkit-playsinline="1" playsinline="1" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
-              card.setAttribute("data-muted", "0");
-              if (muteBtn) muteBtn.textContent = "🔊";
+            if (isMp4) {
+              var vid = box.querySelector("video");
+              if (vid) {
+                if (vid.muted) { vid.muted = false; try { vid.play(); } catch (err) {} card.setAttribute("data-muted", "0"); if (muteBtn) muteBtn.textContent = "🔊"; }
+                else { vid.muted = true; card.setAttribute("data-muted", "1"); if (muteBtn) muteBtn.textContent = "🔇"; }
+              }
             } else {
-              var muted = card.getAttribute("data-muted") !== "0";
-              var fn = muted ? "unMute" : "mute";
-              try { f.contentWindow.postMessage('{"event":"command","func":"' + fn + '","args":""}', "*"); } catch (err) {}
-              card.setAttribute("data-muted", muted ? "0" : "1");
-              if (muteBtn) muteBtn.textContent = muted ? "🔊" : "🔇";
+              var id = card.getAttribute("data-yt");
+              var f = box.querySelector("iframe");
+              if (!f) {
+                box.innerHTML = '<iframe class="pf-iframe" src="' + ytUrl(id, true) +
+                  '" frameborder="0" webkit-playsinline="1" playsinline="1" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+                card.setAttribute("data-muted", "0");
+                if (muteBtn) muteBtn.textContent = "🔊";
+              } else {
+                var muted = card.getAttribute("data-muted") !== "0";
+                var fn = muted ? "unMute" : "mute";
+                try { f.contentWindow.postMessage('{"event":"command","func":"' + fn + '","args":""}', "*"); } catch (err) {}
+                card.setAttribute("data-muted", muted ? "0" : "1");
+                if (muteBtn) muteBtn.textContent = muted ? "🔊" : "🔇";
+              }
             }
             return;
           }
+
           // Tapping elsewhere on the card: open with sound.
           card.setAttribute("data-opened", "1");
           card.setAttribute("data-muted", "0");
           if (muteBtn) muteBtn.textContent = "🔊";
-          if (f) {
-            try {
-              f.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', "*");
-              f.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', "*");
-            } catch (err) {}
+          if (isMp4) {
+            var v = box.querySelector("video");
+            if (v && !v.src) { v.src = v.getAttribute("data-src"); }
+            if (v) { v.muted = false; try { v.play(); } catch (err) {} }
           } else {
-            box.innerHTML = '<iframe class="pf-iframe" src="' + ytUrl(id, true) +
-              '" frameborder="0" webkit-playsinline="1" playsinline="1" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+            var ytId = card.getAttribute("data-yt");
+            var ff = box.querySelector("iframe");
+            if (ff) {
+              try {
+                ff.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', "*");
+                ff.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', "*");
+              } catch (err) {}
+            } else {
+              box.innerHTML = '<iframe class="pf-iframe" src="' + ytUrl(ytId, true) +
+                '" frameborder="0" webkit-playsinline="1" playsinline="1" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+            }
           }
         });
       }

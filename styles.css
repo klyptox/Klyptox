@@ -378,6 +378,7 @@ body[data-theme="dark"] .pf-card .pf-placeholder { color: var(--muted-dark); }
 .pf-video-box.pf-lazy span { position: absolute; bottom: 8px; left: 0; right: 0; z-index: 2; font-size: 12px; text-shadow: 0 1px 4px rgba(0,0,0,0.6); color: #fff; }
 .pf-sound-hint { top: 8px !important; bottom: auto !important; font-size: 11px !important; opacity: 0.9; }
 .pf-iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; z-index: 3; }
+.pf-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 3; background: #000; }
 .pf-mute-btn { position: absolute; top: 8px; right: 8px; z-index: 4; width: 34px; height: 34px; border: none; border-radius: 50%; background: rgba(0,0,0,0.55); color: #fff; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .pf-card:hover .pf-video-box { border-color: var(--teal); }
 body[data-theme="dark"] .pf-video-box { border-color: var(--border-dark); color: var(--muted-dark); }
