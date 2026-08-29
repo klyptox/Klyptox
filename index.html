@@ -246,9 +246,11 @@
         { platform: "tiktok", yt: "", title: "TikTok 1" },
         { platform: "tiktok", yt: "", title: "TikTok 2" }
       ];
-      // Build a YouTube embed URL (muted autoplay allowed; jsapi for play/pause control).
-      function ytUrl(id) {
-        return "https://www.youtube.com/embed/" + id + "?autoplay=1&mute=1&controls=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1";
+      // Hide YouTube chrome entirely (controls=0 => no CC button, no channel overlay).
+      function ytUrl(id, withSound) {
+        var mute = withSound ? "0" : "1";
+        return "https://www.youtube.com/embed/" + id +
+          "?autoplay=1&mute=" + mute + "&controls=0&playsinline=1&rel=0&modestbranding=1&cc_load_policy=0&enablejsapi=1";
       }
       // Lazy card: thumbnail first (smooth scroll), iframe injected on first view.
       function ytCard(c) {
@@ -281,7 +283,7 @@
           var box = card.querySelector(".pf-video-box");
           if (e.isIntersecting) {
             if (!box.querySelector("iframe")) {
-              box.innerHTML = '<iframe class="pf-iframe" src="' + ytUrl(id) +
+              box.innerHTML = '<iframe class="pf-iframe" src="' + ytUrl(id, false) +
                 '" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
             } else {
               var yt = box.querySelector("iframe").contentWindow;
@@ -304,32 +306,8 @@
           if (io) io.observe(grid.lastElementChild);
         });
       }
-      // Mute/unmute button: toggle sound on the loaded iframe (stops propagation so card doesn't also open).
-      if (grid) {
-        grid.addEventListener("click", function (e) {
-          var btn = e.target.closest(".pf-mute-btn");
-          if (!btn) return;
-          e.stopPropagation();
-          var card = btn.closest(".pf-card[data-yt]");
-          var f = card && card.querySelector("iframe");
-          if (!f) {
-            // No iframe yet: open with sound first.
-            var box = card.querySelector(".pf-video-box");
-            var id = card.getAttribute("data-yt");
-            card.setAttribute("data-opened", "1");
-            box.innerHTML = '<iframe class="pf-iframe" src="' + ytUrl(id).replace("mute=1", "mute=0") +
-              '" frameborder="0" webkit-playsinline="1" playsinline="1" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
-            btn.textContent = "🔊";
-            return;
-          }
-          window.__pfMuted = !window.__pfMuted;
-          var fn = window.__pfMuted ? "mute" : "unMute";
-          try { f.contentWindow.postMessage('{"event":"command","func":"' + fn + '","args":""}', "*"); } catch (err) {}
-          btn.textContent = window.__pfMuted ? "🔇" : "🔊";
-        });
-      }
-      // Click a card: open WITH SOUND (user gesture). Replace any existing muted iframe,
-      // or unMute the one already auto-loaded. Locks the card (observer won't touch it).
+      // Single delegated click handler: mute button toggles sound; tapping card opens with sound.
+      // Uses data-muted on the card so the 🔇/🔊 symbol always reflects real state.
       var grid = document.getElementById("portfolio-grid");
       if (grid) {
         grid.addEventListener("click", function (e) {
@@ -337,16 +315,35 @@
           if (!card) return;
           var box = card.querySelector(".pf-video-box");
           var id = card.getAttribute("data-yt");
-          if (!box || !id) return;
-          card.setAttribute("data-opened", "1");
           var f = box.querySelector("iframe");
+          var muteBtn = card.querySelector(".pf-mute-btn");
+          if (e.target.closest(".pf-mute-btn")) {
+            card.setAttribute("data-opened", "1");
+            if (!f) {
+              box.innerHTML = '<iframe class="pf-iframe" src="' + ytUrl(id, true) +
+                '" frameborder="0" webkit-playsinline="1" playsinline="1" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+              card.setAttribute("data-muted", "0");
+              if (muteBtn) muteBtn.textContent = "🔊";
+            } else {
+              var muted = card.getAttribute("data-muted") !== "0";
+              var fn = muted ? "unMute" : "mute";
+              try { f.contentWindow.postMessage('{"event":"command","func":"' + fn + '","args":""}', "*"); } catch (err) {}
+              card.setAttribute("data-muted", muted ? "0" : "1");
+              if (muteBtn) muteBtn.textContent = muted ? "🔊" : "🔇";
+            }
+            return;
+          }
+          // Tapping elsewhere on the card: open with sound.
+          card.setAttribute("data-opened", "1");
+          card.setAttribute("data-muted", "0");
+          if (muteBtn) muteBtn.textContent = "🔊";
           if (f) {
             try {
               f.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', "*");
               f.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', "*");
             } catch (err) {}
           } else {
-            box.innerHTML = '<iframe class="pf-iframe" src="' + ytUrl(id).replace("mute=1", "mute=0") +
+            box.innerHTML = '<iframe class="pf-iframe" src="' + ytUrl(id, true) +
               '" frameborder="0" webkit-playsinline="1" playsinline="1" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
           }
         });
