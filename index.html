@@ -284,8 +284,13 @@
           if (!mp4 && !id) return;
           if (mp4) {
             var vid = box.querySelector("video");
-            if (e.isIntersecting) { if (vid && vid.paused) { try { vid.play(); } catch (err) {} } }
-            else { if (vid && !vid.paused) { try { vid.pause(); } catch (err) {} } }
+            if (!vid) return;
+            if (e.isIntersecting) {
+              if (!vid.src) { vid.src = vid.getAttribute("data-src"); }
+              if (vid.paused) { vid.muted = true; try { vid.play(); } catch (err) {} }
+            } else {
+              if (!vid.paused) { try { vid.pause(); } catch (err) {} }
+            }
             return;
           }
           var f = box.querySelector("iframe");
