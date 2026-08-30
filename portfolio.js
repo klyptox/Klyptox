@@ -23,7 +23,7 @@ const clips = [
   { platform: "instagram", mp4: "ig2.mp4", title: "Instagram Reels 2" },
   // Facebook
   { platform: "facebook", mp4: "", title: "Facebook 1" },
-  { platform: "facebook", mp4: "", title: "Facebook 2" },
+  { platform: "facebook", mp4: "fb2.mp4", title: "Facebook 2" },
   // TikTok
   { platform: "tiktok", mp4: "", title: "TikTok 1" },
   { platform: "tiktok", mp4: "tk2.mp4", title: "TikTok 2" },
