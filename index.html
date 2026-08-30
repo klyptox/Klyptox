@@ -285,7 +285,7 @@
           '<div class="pf-embed">' +
           '<button class="pf-mute-btn" type="button" aria-label="Toggle sound">🔇</button>' +
           '<div class="pf-video-box pf-lazy">' +
-          '<video class="pf-video" preload="metadata" muted loop playsinline webkit-playsinline src="videos/' + c.mp4 + '"></video>' +
+          '<video class="pf-video" preload="metadata" muted loop playsinline webkit-playsinline poster="videos/' + c.mp4.replace('.mp4','.jpg') + '" src="videos/' + c.mp4 + '"></video>' +
           '<div class="pf-play">▶</div><span>' + c.title + '</span>' +
           '<span class="pf-sound-hint">🔊 tap for sound</span></div></div>' +
           '<div class="pf-title">' + c.title + '</div></div>';
