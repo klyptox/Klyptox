@@ -17,7 +17,7 @@ const clips = [
   // ---- PLACEHOLDER CARDS (remove these once real clips are added) ----
   // YouTube Shorts (slot 1 — self-hosted MP4)
   { platform: "youtube", mp4: "clip1.mp4", title: "YouTube Shorts 1" },
-  { platform: "youtube", mp4: "", title: "YouTube Shorts 2" },
+  { platform: "youtube", mp4: "yt2.mp4", title: "YouTube Shorts 2" },
   // Instagram Reels
   { platform: "instagram", mp4: "ig1.mp4", title: "Instagram Reels 1" },
   { platform: "instagram", mp4: "", title: "Instagram Reels 2" },
