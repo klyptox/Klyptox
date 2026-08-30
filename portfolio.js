@@ -26,7 +26,7 @@ const clips = [
   { platform: "facebook", mp4: "", title: "Facebook 2" },
   // TikTok
   { platform: "tiktok", mp4: "", title: "TikTok 1" },
-  { platform: "tiktok", mp4: "", title: "TikTok 2" },
+  { platform: "tiktok", mp4: "tk2.mp4", title: "TikTok 2" },
   // --------------------------------------------------------------------
 ];
 
