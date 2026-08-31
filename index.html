@@ -286,6 +286,7 @@
           '<button class="pf-mute-btn" type="button" aria-label="Toggle sound">🔇</button>' +
           '<div class="pf-video-box pf-lazy">' +
           '<video class="pf-video" preload="metadata" muted loop playsinline webkit-playsinline poster="videos/' + c.mp4.replace('.mp4','.jpg') + '" src="videos/' + c.mp4 + '"></video>' +
+          '<img class="pf-poster" src="videos/' + c.mp4.replace('.mp4','.jpg') + '" alt="" />' +
           '<div class="pf-play">▶</div><span>' + c.title + '</span>' +
           '<span class="pf-sound-hint">🔊 tap for sound</span></div></div>' +
           '<div class="pf-title">' + c.title + '</div></div>';
@@ -313,9 +314,10 @@
             var vid = box.querySelector("video");
             if (!vid) return;
             if (e.isIntersecting) {
-              if (vid.paused) { try { vid.play(); } catch (err) {} }
+              if (vid.paused) { vid.addEventListener('play', function hidePoster(){ var p = box.querySelector('.pf-poster'); if (p) p.classList.add('hidden'); }, { once: true }); try { vid.play(); } catch (err) {} }
             } else {
               if (!vid.paused) { try { vid.pause(); } catch (err) {} }
+              var p = box.querySelector('.pf-poster'); if (p) p.classList.remove('hidden');
             }
             return;
           }
