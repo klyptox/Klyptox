@@ -78,6 +78,9 @@ window.addEventListener("scroll", () => {
     const pct = h > 0 ? (y / h) * 100 : 0;
     if (progress) progress.style.transform = `scaleX(${pct / 100})`;
     if (navEl) navEl.classList.toggle("scrolled", y > 30);
+    const heroEl = document.querySelector(".hero");
+    const heroH = heroEl ? heroEl.offsetHeight : 0;
+    document.body.classList.toggle("past-hero", y > heroH * 0.6);
     if (heroBg && !isMobile) heroBg.style.transform = `translateY(${y * 0.15}px)`;
     ticking = false;
   });

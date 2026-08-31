@@ -223,6 +223,11 @@ body[data-theme="dark"] .aurora { opacity: 0.95; }
 @keyframes wash1 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(8vw,5vh); } }
 @keyframes wash2 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-7vw,6vh); } }
 @keyframes wash3 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(5vw,-6vh); } }
+/* Freeze heavy decorative animations once past the hero so 8 videos get the GPU */
+body.past-hero .aurora, body.past-hero .hero-bg { animation: none !important; will-change: auto !important; }
+/* Cursor glow uses mix-blend-mode (re-composites whole viewport on mousemove) -> hide it
+   to keep video playback smooth in the showcase. */
+.cursor-glow { display: none; }
 
 .hero {
   position: relative; min-height: 88vh;
