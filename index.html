@@ -285,8 +285,8 @@
           '<div class="pf-embed">' +
           '<button class="pf-mute-btn" type="button" aria-label="Toggle sound">🔇</button>' +
           '<div class="pf-video-box pf-lazy">' +
-          '<video class="pf-video" preload="none" muted loop playsinline webkit-playsinline poster="videos/' + c.mp4.replace('.mp4','.jpg') + '" data-src="videos/' + c.mp4 + '"></video>' +
-          '<img class="pf-poster" src="videos/' + c.mp4.replace('.mp4','.jpg') + '" alt="" />' +
+          '<video class="pf-video" preload="none" muted loop playsinline webkit-playsinline decode="async" disablepictureinpicture controlslist="nodownload" poster="videos/' + c.mp4.replace('.mp4','_sm.jpg') + '" data-src="videos/' + c.mp4.replace('.mp4','_1080.mp4') + '"></video>' +
+          '<img class="pf-poster" src="videos/' + c.mp4.replace('.mp4','_sm.jpg') + '" alt="" loading="lazy" />' +
           '<div class="pf-play">▶</div><span>' + c.title + '</span>' +
           '<span class="pf-sound-hint">🔊 tap for sound</span></div></div>' +
           '<div class="pf-title">' + c.title + '</div></div>';
@@ -303,7 +303,7 @@
       }
       // IntersectionObserver: autoplay only the MOST-CENTERED cards (concurrency cap)
       // so "All" view doesn't try to decode/play 8 videos at once (which lags).
-      var MAX_PLAY = window.matchMedia("(max-width: 820px)").matches ? 1 : 2;
+      var MAX_PLAY = 1; // only the most-centered card plays at a time (smooth even on weak laptops)
       var visibleCards = new Set();
       function cardCenterDist(card) {
         var r = card.getBoundingClientRect();
