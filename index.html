@@ -315,8 +315,7 @@
         // sort visible cards by proximity to viewport center; play top MAX_PLAY, pause rest
         var arr = Array.from(visibleCards).sort(function (a, b) { return cardCenterDist(a) - cardCenterDist(b); });
         arr.forEach(function (card, i) {
-          var opened = card.getAttribute("data-opened") === "1"; // user tapped for sound -> always play
-          var shouldPlay = (i < MAX_PLAY) || opened;
+          var shouldPlay = (i < MAX_PLAY); // STRICTLY one video plays at a time (the most-centered card)
           var box = card.querySelector(".pf-video-box");
           if (!box) return;
           var id = card.getAttribute("data-yt");
@@ -411,7 +410,7 @@
           if (muteBtn) muteBtn.textContent = "🔊";
           if (isMp4) {
             var v = box.querySelector("video");
-            if (v && !v.src) { v.src = "videos/"; }
+            if (v && !v.src && v.getAttribute("data-src")) { v.src = v.getAttribute("data-src"); v.load(); }
             if (v) { v.muted = false; try { v.play(); } catch (err) {} }
           } else {
             var ytId = card.getAttribute("data-yt");
@@ -426,6 +425,7 @@
                 '" frameborder="0" webkit-playsinline="1" playsinline="1" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
             }
           }
+          if (typeof tune === "function") tune();
         });
       }
       render("all");
