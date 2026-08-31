@@ -301,42 +301,61 @@
         if (c.mp4) return mp4Card(c);
         return ph(c.title);
       }
-      // IntersectionObserver: autoplay when in view, ALWAYS pause when scrolled away
-      // (even if the user tapped for sound). This keeps videos from running off-screen.
-      var io = ("IntersectionObserver" in window) ? new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) {
-          var card = e.target;
+      // IntersectionObserver: autoplay only the MOST-CENTERED cards (concurrency cap)
+      // so "All" view doesn't try to decode/play 8 videos at once (which lags).
+      var MAX_PLAY = window.matchMedia("(max-width: 820px)").matches ? 1 : 2;
+      var visibleCards = new Set();
+      function cardCenterDist(card) {
+        var r = card.getBoundingClientRect();
+        var vh = window.innerHeight || 1;
+        var c = r.top + r.height / 2;
+        return Math.abs(c - vh / 2);
+      }
+      function tune() {
+        // sort visible cards by proximity to viewport center; play top MAX_PLAY, pause rest
+        var arr = Array.from(visibleCards).sort(function (a, b) { return cardCenterDist(a) - cardCenterDist(b); });
+        arr.forEach(function (card, i) {
+          var opened = card.getAttribute("data-opened") === "1"; // user tapped for sound -> always play
+          var shouldPlay = (i < MAX_PLAY) || opened;
+          var box = card.querySelector(".pf-video-box");
+          if (!box) return;
           var id = card.getAttribute("data-yt");
           var mp4 = card.getAttribute("data-mp4");
-          var box = card.querySelector(".pf-video-box");
-          if (!mp4 && !id) return;
           if (mp4) {
             var vid = box.querySelector("video");
             if (!vid) return;
-            if (e.isIntersecting) {
-              if (vid.paused) {
+            if (shouldPlay) {
               if (!vid.src && vid.getAttribute("data-src")) { try { vid.src = vid.getAttribute("data-src"); vid.load(); } catch (err) {} }
-              vid.addEventListener('play', function hidePoster(){ var p = box.querySelector('.pf-poster'); if (p) p.classList.add('hidden'); }, { once: true }); try { vid.play(); } catch (err) {}
-            }
+              if (vid.paused) { vid.addEventListener('play', function hidePoster(){ var p = box.querySelector('.pf-poster'); if (p) p.classList.add('hidden'); }, { once: true }); try { vid.play(); } catch (err) {} }
             } else {
               if (!vid.paused) { try { vid.pause(); } catch (err) {} }
               var p = box.querySelector('.pf-poster'); if (p) p.classList.remove('hidden');
             }
-            return;
-          }
-          var f = box.querySelector("iframe");
-          if (e.isIntersecting) {
-            if (!f) {
-              box.innerHTML = '<iframe class="pf-iframe" src="' + ytUrl(id, false) +
-                '" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
-            } else {
-              try { f.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', "*"); } catch (err) {}
+          } else if (id) {
+            var f = box.querySelector("iframe");
+            if (shouldPlay) {
+              if (!f) { box.innerHTML = '<iframe class="pf-iframe" src="' + ytUrl(id, false) + '" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>'; }
+              else { try { f.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', "*"); } catch (err) {} }
+            } else if (f) {
+              try { f.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', "*"); } catch (err) {}
             }
-          } else if (f) {
-            try { f.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', "*"); } catch (err) {}
           }
         });
+      }
+      var io = ("IntersectionObserver" in window) ? new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          var card = e.target;
+          if (e.isIntersecting) visibleCards.add(card); else visibleCards.delete(card);
+        });
+        tune();
       }, { threshold: 0.25 }) : null;
+      // Re-tune on scroll so the most-centered cards play (rAF-throttled)
+      var tuneTicking = false;
+      window.addEventListener("scroll", function () {
+        if (tuneTicking) return;
+        tuneTicking = true;
+        requestAnimationFrame(function () { tune(); tuneTicking = false; });
+      }, { passive: true });
       function render(filter) {
         var grid = document.getElementById("portfolio-grid");
         if (!grid) return;
