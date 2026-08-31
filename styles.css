@@ -361,7 +361,7 @@ body[data-theme="dark"] .card p { color: var(--muted-dark); }
 body[data-theme="dark"] .filter-btn { background: var(--card-dark); border-color: var(--border-dark); color: var(--text-dark); }
 .filter-btn:hover { transform: translateY(-2px); }
 .filter-btn.active { background: var(--teal); color: #fff; border-color: var(--teal); }
-.pf-card { background: #fff; border: 1px solid var(--border-light); border-radius: 14px; overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease; animation: pfIn 0.5s ease both; }
+.pf-card { background: #fff; border: 1px solid var(--border-light); border-radius: 14px; overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease; animation: pfIn 0.5s ease both; content-visibility: auto; contain-intrinsic-size: auto 360px; }
 @keyframes pfIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 .pf-card:hover { animation-play-state: paused; transform: translateY(-8px) scale(1.015); box-shadow: 0 22px 48px rgba(15,155,142,0.22); }
 body[data-theme="dark"] .pf-card { background: var(--card-dark); border-color: var(--border-dark); }
@@ -456,8 +456,8 @@ body[data-theme="dark"] .footer-copy { color: var(--muted-dark); }
   position: fixed; width: 26px; height: 26px; border-radius: 50%;
   background: radial-gradient(circle, rgba(15,155,142,0.45), rgba(15,155,142,0) 70%);
   pointer-events: none; z-index: 999;
-  transform: translate(-50%, -50%); transition: opacity 0.3s ease, width 0.2s ease, height 0.2s ease; mix-blend-mode: multiply;
-  filter: blur(2px);
+  transform: translate3d(-50%, -50%, 0); transition: opacity 0.3s ease, width 0.2s ease, height 0.2s ease; mix-blend-mode: multiply;
+  will-change: transform;
 }
 .cursor-glow.hover { width: 46px; height: 46px; }
 body[data-theme="dark"] .cursor-glow { background: radial-gradient(circle, rgba(15,155,142,0.6), rgba(15,155,142,0) 70%); mix-blend-mode: screen; }

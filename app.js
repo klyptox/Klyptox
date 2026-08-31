@@ -89,8 +89,7 @@ if (window.matchMedia("(pointer:fine)").matches) {
   glow.className = "cursor-glow";
   document.body.appendChild(glow);
   window.addEventListener("mousemove", (e) => {
-    glow.style.left = e.clientX + "px";
-    glow.style.top = e.clientY + "px";
+    glow.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -50%)`;
   });
   document.addEventListener("mouseleave", () => (glow.style.opacity = "0"));
   document.addEventListener("mouseenter", () => (glow.style.opacity = "1"));
