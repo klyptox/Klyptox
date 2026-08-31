@@ -301,11 +301,20 @@
         if (c.mp4) return mp4Card(c);
         return ph(c.title);
       }
-      // IntersectionObserver: every video that scrolls INTO view plays;
-      // every video that leaves the screen (scrolls away) pauses. Lazy-loads src once.
-      var io = ("IntersectionObserver" in window) ? new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) {
-          var card = e.target;
+      // Playback cap: only the N most-centered cards play at once (keeps 1080p quality
+      // smooth even on weak laptops). Cards still lazy-load src on first view; off-screen
+      // and far-from-center cards pause. You still SEE every on-screen video playing.
+      var MAX_PLAY = 4;
+      var visibleCards = new Set();
+      function cardCenterDist(card) {
+        var r = card.getBoundingClientRect();
+        var vh = window.innerHeight || 1;
+        return Math.abs((r.top + r.height / 2) - vh / 2);
+      }
+      function tune() {
+        var arr = Array.from(visibleCards).sort(function (a, b) { return cardCenterDist(a) - cardCenterDist(b); });
+        arr.forEach(function (card, i) {
+          var shouldPlay = i < MAX_PLAY;
           var box = card.querySelector(".pf-video-box");
           if (!box) return;
           var id = card.getAttribute("data-yt");
@@ -313,7 +322,7 @@
           if (mp4) {
             var vid = box.querySelector("video");
             if (!vid) return;
-            if (e.isIntersecting) {
+            if (shouldPlay) {
               if (!vid.src && vid.getAttribute("data-src")) { try { vid.src = vid.getAttribute("data-src"); vid.load(); } catch (err) {} }
               if (vid.paused) { vid.addEventListener('play', function hidePoster(){ var p = box.querySelector('.pf-poster'); if (p) p.classList.add('hidden'); }, { once: true }); try { vid.play(); } catch (err) {} }
             } else {
@@ -322,7 +331,7 @@
             }
           } else if (id) {
             var f = box.querySelector("iframe");
-            if (e.isIntersecting) {
+            if (shouldPlay) {
               if (!f) { box.innerHTML = '<iframe class="pf-iframe" src="' + ytUrl(id, false) + '" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>'; }
               else { try { f.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', "*"); } catch (err) {} }
             } else if (f) {
@@ -330,7 +339,20 @@
             }
           }
         });
+      }
+      var io = ("IntersectionObserver" in window) ? new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          var card = e.target;
+          if (e.isIntersecting) visibleCards.add(card); else visibleCards.delete(card);
+        });
+        tune();
       }, { threshold: 0.25 }) : null;
+      var tuneTicking = false;
+      window.addEventListener("scroll", function () {
+        if (tuneTicking) return;
+        tuneTicking = true;
+        requestAnimationFrame(function () { tune(); tuneTicking = false; });
+      }, { passive: true });
       function render(filter) {
         var grid = document.getElementById("portfolio-grid");
         if (!grid) return;
