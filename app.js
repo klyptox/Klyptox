@@ -64,18 +64,12 @@ reveals.forEach((r) => io.observe(r));
 
 // Nav shrink on scroll (lightweight, no parallax, no progress bar)
 const navEl = document.querySelector(".nav");
-let ticking = false;
 window.addEventListener("scroll", () => {
-  if (ticking) return;
-  ticking = true;
-  requestAnimationFrame(() => {
-    const y = window.scrollY;
-    if (navEl) navEl.classList.toggle("scrolled", y > 30);
-    const heroEl = document.querySelector(".hero");
-    const heroH = heroEl ? heroEl.offsetHeight : 0;
-    document.body.classList.toggle("past-hero", y > heroH * 0.6);
-    ticking = false;
-  });
+  const y = window.scrollY;
+  if (navEl) navEl.classList.toggle("scrolled", y > 30);
+  const heroEl = document.querySelector(".hero");
+  const heroH = heroEl ? heroEl.offsetHeight : 0;
+  document.body.classList.toggle("past-hero", y > heroH * 0.6);
 }, { passive: true });
 
 // Subtle cursor glow (desktop only)
