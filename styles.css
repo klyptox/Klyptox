@@ -252,7 +252,7 @@ a:hover { text-decoration: underline; }
   transition: transform 0.3s var(--ease), box-shadow 0.3s ease, border-color 0.3s ease;
   cursor: default;
 }
-.stat:hover { transform: translateY(-8px) scale(1.03); border-color: rgba(15, 155, 142, 0.35); }
+.stat:hover { transform: translateY(-10px) scale(1.02); border-color: rgba(15, 155, 142, 0.35); }
 .stat-num { font-family: var(--font-display); font-size: 48px; font-weight: 800; color: var(--teal); line-height: 1; }
 .stat-plus, .stat-suffix { font-family: var(--font-display); font-size: 30px; font-weight: 800; color: var(--teal); }
 .stat p { font-size: 14px; color: var(--stat-text); margin-top: 10px; font-weight: 500; }
@@ -284,7 +284,7 @@ a:hover { text-decoration: underline; }
   border-radius: var(--radius-md); padding: 28px;
   transition: transform 0.3s var(--ease), box-shadow 0.3s ease, border-color 0.3s ease;
 }
-.card:hover { transform: translateY(-10px) scale(1.025); border-color: rgba(15, 155, 142, 0.35); }
+.card:hover { transform: translateY(-10px) scale(1.02); border-color: rgba(15, 155, 142, 0.35); }
 .card h3 { font-size: 19px; margin-bottom: 8px; color: var(--card-title); }
 .card p { font-size: 15px; color: var(--text-soft); line-height: 1.6; }
 
