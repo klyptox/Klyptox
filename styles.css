@@ -406,7 +406,7 @@ body:not([data-theme="dark"]) {
   --glass-shadow: 0 14px 40px rgba(15, 155, 142, 0.10), 0 3px 10px rgba(11, 18, 19, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 body {
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(15, 155, 142, 0.025));
+  background: var(--bg);
 }
 
 /* Dark mode: richer deep background + luminous teal glass + inner highlight */
