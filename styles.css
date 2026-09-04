@@ -128,6 +128,22 @@ body[data-theme="dark"]::before {
   33%      { transform: translate3d(40px, -30px, 0) scale(1.08); }
   66%      { transform: translate3d(-30px, 25px, 0) scale(0.95); }
 }
+
+/* ---- Animated wave lines (GPU-cheap: transform/opacity only) ---- */
+.bg-waves {
+  position: fixed; inset: auto 0 -2px 0; height: 38vh; z-index: -2; pointer-events: none;
+  overflow: hidden; opacity: 0.5;
+}
+.bg-waves .wave {
+  position: absolute; left: 0; bottom: 0; width: 200%; height: 100%;
+  display: block; will-change: transform;
+}
+.bg-waves .wave path { fill: var(--teal); }
+.bg-waves .wave-1 { opacity: 0.10; animation: waveMove 22s linear infinite; }
+.bg-waves .wave-2 { opacity: 0.07; animation: waveMove 34s linear infinite reverse; }
+@keyframes waveMove { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-50%, 0, 0); } }
+/* Pause waves while a video is on screen so the GPU budget goes to playback */
+body.showcase-active .bg-waves .wave { animation-play-state: paused; }
 /* Subtle dot grid, masked so it reads as crafted depth, not noise */
 body::after {
   content: "";

@@ -132,3 +132,15 @@ document.querySelectorAll('a[href^="#"]').forEach((a) => {
     }
   });
 });
+
+// Pause background wave animation while the showcase (video) section is on screen,
+// so the GPU budget goes to smooth video playback. Resumes when it leaves.
+const showcaseSec = document.getElementById("showcase");
+if (showcaseSec) {
+  const waveIO = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      document.body.classList.toggle("showcase-active", e.isIntersecting && e.intersectionRatio > 0.15);
+    });
+  }, { threshold: [0, 0.15, 0.5] });
+  waveIO.observe(showcaseSec);
+}
