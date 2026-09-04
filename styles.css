@@ -397,6 +397,105 @@ body[data-theme="dark"] .results-box h3 { color: var(--teal-bright); }
 .cursor-glow.hover { width: 38px; height: 38px; }
 body[data-theme="dark"] .cursor-glow { border-color: rgba(47, 208, 191, 0.8); background: rgba(47, 208, 191, 0.14); }
 
+/* ============================================================
+   PREMIUM UPGRADES (additive, transform/opacity + static masks only)
+   ============================================================ */
+
+/* Light mode: airy editorial surface + confident glass shadow */
+body:not([data-theme="dark"]) {
+  --glass-shadow: 0 14px 40px rgba(15, 155, 142, 0.10), 0 3px 10px rgba(11, 18, 19, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+body {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(15, 155, 142, 0.025));
+}
+
+/* Dark mode: richer deep background + luminous teal glass + inner highlight */
+body[data-theme="dark"] {
+  background:
+    radial-gradient(1200px 620px at 50% -12%, rgba(15, 155, 142, 0.12), transparent 60%),
+    radial-gradient(900px 520px at 100% 102%, rgba(47, 208, 191, 0.07), transparent 55%),
+    var(--bg);
+  --glass-shadow: 0 18px 52px rgba(0, 0, 0, 0.55), 0 2px 14px rgba(15, 155, 142, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* Gradient hairline borders on glass surfaces (mask trick, no extra paint) */
+:is(.card, .glass, .hero-inner, .stat) {
+  position: relative;
+  isolation: isolate;
+}
+:is(.card, .glass, .hero-inner, .stat)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(140deg, rgba(47, 208, 191, 0.55), rgba(47, 208, 191, 0.08) 42%, transparent 72%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+  z-index: 0;
+}
+:is(.card, .glass, .hero-inner, .stat) > * { position: relative; z-index: 1; }
+body[data-theme="dark"] :is(.card, .glass, .hero-inner, .stat)::before {
+  background: linear-gradient(140deg, rgba(47, 208, 191, 0.62), rgba(47, 208, 191, 0.10) 40%, transparent 70%);
+}
+
+/* Section title accent underline */
+.section-title { position: relative; }
+.section-title::after {
+  content: "";
+  display: block;
+  width: 64px;
+  height: 3px;
+  margin: 18px auto 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--teal), var(--teal-bright));
+}
+
+/* Premium buttons: refined fills, ghost, and a sweeping sheen (transform only) */
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 26px rgba(15, 155, 142, 0.28), 0 2px 6px rgba(15, 155, 142, 0.18);
+}
+.btn-primary::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -130%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: skewX(-20deg);
+  transition: transform 0.6s var(--ease);
+  pointer-events: none;
+}
+.btn-primary:hover::after { transform: translateX(340%) skewX(-20deg); }
+.btn-ghost { box-shadow: 0 6px 18px rgba(15, 155, 142, 0.10); }
+.nav-cta { box-shadow: 0 8px 22px rgba(15, 155, 142, 0.28); }
+
+/* Refined teal focus-visible rings */
+a:focus-visible,
+button:focus-visible,
+.btn-primary:focus-visible,
+.btn-ghost:focus-visible,
+.filter-btn:focus-visible,
+.theme-toggle:focus-visible,
+.nav-links a:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(15, 155, 142, 0.35), 0 0 0 1px var(--teal);
+}
+
+/* Minor type polish: tighter display tracking, calmer section rhythm */
+.hero-tagline { letter-spacing: -0.035em; }
+.section { padding: 92px 36px; }
+
+/* Reduced motion: decorative motion off only */
+@media (prefers-reduced-motion: reduce) {
+  .btn-primary::after { display: none; }
+}
+
 /* ===================== RESPONSIVE ===================== */
 @media (max-width: 1180px) {
   .nav-links { gap: 12px; }
