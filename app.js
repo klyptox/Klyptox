@@ -33,10 +33,10 @@ toggle.addEventListener("click", () => {
 });
 try {
   var savedTheme = localStorage.getItem("klyptox-theme");
-  setTheme(savedTheme === "light" ? "light" : "dark"); // default to dark on open
+  setTheme(savedTheme === "light" ? "light" : "dark"); // default to dark
 } catch (e) { setTheme("dark"); }
 
-// Assign alternating directional reveal to grid cards for layered scroll motion
+// Assign alternating directional reveal to grid cards
 document.querySelectorAll(".grid-2, .grid-3").forEach((grid) => {
   [...grid.children].forEach((child, i) => {
     if (!child.classList.contains("reveal")) child.classList.add("reveal");
@@ -47,7 +47,7 @@ document.querySelectorAll(".grid-2, .grid-3").forEach((grid) => {
 document.querySelectorAll(".section-title, .section-lead, .about-desc, .about-mission, .results-box, .contact-grid")
   .forEach((el) => { if (!el.classList.contains("reveal")) el.classList.add("reveal"); });
 
-// Scroll reveal with stagger + direction
+// Scroll reveal with stagger
 const reveals = document.querySelectorAll(".reveal");
 const io = new IntersectionObserver((entries) => {
   entries.forEach((e) => {
@@ -62,26 +62,18 @@ const io = new IntersectionObserver((entries) => {
 }, { threshold: 0.12 });
 reveals.forEach((r) => io.observe(r));
 
-// Scroll progress bar
-const progress = document.getElementById("scrollProgress");
-// Nav shrink + progress + hero parallax (throttled with rAF to avoid jank)
+// Nav shrink on scroll (lightweight, no parallax, no progress bar)
 const navEl = document.querySelector(".nav");
-const heroBg = document.getElementById("heroBg");
-const isMobile = window.matchMedia("(max-width: 820px)").matches;
 let ticking = false;
 window.addEventListener("scroll", () => {
   if (ticking) return;
   ticking = true;
   requestAnimationFrame(() => {
     const y = window.scrollY;
-    const h = document.documentElement.scrollHeight - window.innerHeight;
-    const pct = h > 0 ? (y / h) * 100 : 0;
-    if (progress) progress.style.transform = `scaleX(${pct / 100})`;
     if (navEl) navEl.classList.toggle("scrolled", y > 30);
     const heroEl = document.querySelector(".hero");
     const heroH = heroEl ? heroEl.offsetHeight : 0;
     document.body.classList.toggle("past-hero", y > heroH * 0.6);
-    if (heroBg && !isMobile) heroBg.style.transform = `translateY(${y * 0.15}px)`;
     ticking = false;
   });
 }, { passive: true });
@@ -96,7 +88,6 @@ if (window.matchMedia("(pointer:fine)").matches) {
   });
   document.addEventListener("mouseleave", () => (glow.style.opacity = "0"));
   document.addEventListener("mouseenter", () => (glow.style.opacity = "1"));
-  // grow glow over interactive elements
   document.querySelectorAll("a, button, input, textarea").forEach((el) => {
     el.addEventListener("mouseenter", () => glow.classList.add("hover"));
     el.addEventListener("mouseleave", () => glow.classList.remove("hover"));
@@ -124,35 +115,7 @@ const statIO = new IntersectionObserver((entries) => {
 }, { threshold: 0.4 });
 statNums.forEach((n) => statIO.observe(n));
 
-// 3D tilt on cards (cursor-following)
-if (window.matchMedia("(pointer:fine)").matches && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-  document.querySelectorAll(".pf-card, .card").forEach((el) => {
-    el.classList.add("tilt");
-    el.addEventListener("mousemove", (e) => {
-      const r = el.getBoundingClientRect();
-      const px = (e.clientX - r.left) / r.width - 0.5;
-      const py = (e.clientY - r.top) / r.height - 0.5;
-      el.style.transform = `perspective(900px) rotateY(${px * 8}deg) rotateX(${-py * 8}deg) translateY(-4px)`;
-    });
-    el.addEventListener("mouseleave", () => { el.style.transform = ""; });
-  });
-}
-
-// Stat frames: one-time pop effect when cursor passes over
-document.querySelectorAll(".stat").forEach((stat) => {
-  let armed = true;
-  stat.addEventListener("mouseenter", () => {
-    if (armed) {
-      stat.classList.remove("touched");
-      void stat.offsetWidth; // restart animation
-      stat.classList.add("touched");
-      armed = false;
-    }
-  });
-  stat.addEventListener("mouseleave", () => { armed = true; });
-});
-
-// Scrollspy: highlight active nav link
+// Scrollspy
 const navLinksEls = document.querySelectorAll(".nav-links a");
 const sections = [...navLinksEls].map((a) => document.querySelector(a.getAttribute("href"))).filter(Boolean);
 const spy = new IntersectionObserver((entries) => {
@@ -165,7 +128,7 @@ const spy = new IntersectionObserver((entries) => {
 }, { rootMargin: "-45% 0px -50% 0px" });
 sections.forEach((s) => spy.observe(s));
 
-// Smooth scroll for anchor links
+// Smooth scroll
 document.querySelectorAll('a[href^="#"]').forEach((a) => {
   a.addEventListener("click", (e) => {
     const id = a.getAttribute("href");

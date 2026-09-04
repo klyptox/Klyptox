@@ -26,33 +26,6 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body data-theme="light">
-  <div class="scroll-progress" id="scrollProgress"></div>
-  <div class="grain" aria-hidden="true"></div>
-  <div class="bg-mesh" aria-hidden="true"></div>
-  <div class="bg-aurora2" aria-hidden="true"></div>
-  <div class="bg-stripes" aria-hidden="true"></div>
-  <div class="bg-sheen" aria-hidden="true"></div>
-  <div class="bg-waves" aria-hidden="true">
-    <svg width="100%" height="100%" preserveAspectRatio="none">
-      <defs>
-        <pattern id="wave1" width="220" height="70" patternUnits="userSpaceOnUse" patternTransform="translate(0,0)">
-          <path d="M0,35 Q55,5 110,35 T220,35" fill="none" stroke="var(--teal)" stroke-width="1.2" opacity="0.55"/>
-        </pattern>
-        <pattern id="wave2" width="300" height="90" patternUnits="userSpaceOnUse" patternTransform="translate(0,0)">
-          <path d="M0,45 Q75,15 150,45 T300,45" fill="none" stroke="var(--teal)" stroke-width="1" opacity="0.35"/>
-        </pattern>
-        <pattern id="wave3" width="420" height="130" patternUnits="userSpaceOnUse" patternTransform="translate(0,0)">
-          <path d="M0,65 Q105,25 210,65 T420,65" fill="none" stroke="var(--teal)" stroke-width="0.9" opacity="0.22"/>
-        </pattern>
-      </defs>
-      <rect width="100%" height="100%" fill="url(#wave3)"/>
-      <rect width="100%" height="100%" fill="url(#wave1)"/>
-      <rect width="100%" height="100%" fill="url(#wave2)"/>
-      <animate xlink:href="#wave1" attributeName="patternTransform" type="translate" from="0 0" to="220 0" dur="14s" repeatCount="indefinite"/>
-      <animate xlink:href="#wave2" attributeName="patternTransform" type="translate" from="0 0" to="-300 0" dur="22s" repeatCount="indefinite"/>
-      <animate xlink:href="#wave3" attributeName="patternTransform" type="translate" from="0 0" to="420 0" dur="34s" repeatCount="indefinite"/>
-    </svg>
-  </div>
   <div class="theme-fade" id="themeFade" aria-hidden="true"></div>
   <!-- NAV -->
   <nav class="nav">
@@ -74,15 +47,8 @@
 
   <!-- HERO -->
   <header id="home" class="hero">
-    <div class="aurora" aria-hidden="true">
-      <span class="aurora-blob a1"></span>
-      <span class="aurora-blob a2"></span>
-      <span class="aurora-blob a3"></span>
-      <span class="aurora-blob a4"></span>
-    </div>
-    <div class="hero-bg" id="heroBg"></div>
     <div class="hero-inner">
-      <div class="hero-logo"><img src="logo.png" alt="KLYPTOX" class="hero-logo-img" /></div>
+      <div class="hero-logo"><img src="k-symbol.svg" alt="K" class="hero-logo-svg" /></div>
       <h1 class="hero-tagline">Transform. Optimize. Expand.</h1>
       <p class="hero-intro">
         We help creators get more out of the content they've already made, turning long
