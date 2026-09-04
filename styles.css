@@ -252,7 +252,7 @@ a:hover { text-decoration: underline; }
   transition: transform 0.3s var(--ease), box-shadow 0.3s ease, border-color 0.3s ease;
   cursor: default;
 }
-.stat:hover { transform: translateY(-6px); box-shadow: 0 18px 40px rgba(15, 155, 142, 0.18); border-color: rgba(15, 155, 142, 0.4); }
+.stat:hover { transform: translateY(-8px) scale(1.03); box-shadow: 0 22px 46px rgba(15, 155, 142, 0.20); border-color: rgba(15, 155, 142, 0.35); }
 .stat-num { font-family: var(--font-display); font-size: 48px; font-weight: 800; color: var(--teal); line-height: 1; }
 .stat-plus, .stat-suffix { font-family: var(--font-display); font-size: 30px; font-weight: 800; color: var(--teal); }
 .stat p { font-size: 14px; color: var(--stat-text); margin-top: 10px; font-weight: 500; }
@@ -284,7 +284,7 @@ a:hover { text-decoration: underline; }
   border-radius: var(--radius-md); padding: 28px;
   transition: transform 0.3s var(--ease), box-shadow 0.3s ease, border-color 0.3s ease;
 }
-.card:hover { transform: translateY(-6px); box-shadow: 0 22px 50px rgba(15, 155, 142, 0.18); border-color: rgba(15, 155, 142, 0.4); }
+.card:hover { transform: translateY(-10px) scale(1.025); box-shadow: 0 28px 60px rgba(15, 155, 142, 0.20), var(--glass-shadow); border-color: rgba(15, 155, 142, 0.35); }
 .card h3 { font-size: 19px; margin-bottom: 8px; color: var(--card-title); }
 .card p { font-size: 15px; color: var(--text-soft); line-height: 1.6; }
 
@@ -310,7 +310,7 @@ a:hover { text-decoration: underline; }
   transition: transform 0.3s var(--ease), box-shadow 0.3s ease;
   content-visibility: auto; contain-intrinsic-size: auto 360px;
 }
-.pf-card:hover { transform: translateY(-8px); box-shadow: 0 22px 48px rgba(15, 155, 142, 0.20); }
+.pf-card:hover { transform: translateY(-10px) scale(1.02); box-shadow: 0 26px 56px rgba(15, 155, 142, 0.22); }
 .pf-card .pf-embed { position: relative; width: 100%; aspect-ratio: 9 / 16; background: var(--surface-200); overflow: hidden; }
 body[data-theme="dark"] .pf-card .pf-embed { background: #1b2426; }
 .pf-card .pf-embed iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
@@ -418,28 +418,7 @@ body[data-theme="dark"] {
   --glass-shadow: 0 18px 52px rgba(0, 0, 0, 0.55), 0 2px 14px rgba(15, 155, 142, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
-/* Gradient hairline borders on glass surfaces (mask trick, no extra paint) */
-:is(.card, .glass, .hero-inner, .stat) {
-  position: relative;
-  isolation: isolate;
-}
-:is(.card, .glass, .hero-inner, .stat)::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(140deg, rgba(47, 208, 191, 0.55), rgba(47, 208, 191, 0.08) 42%, transparent 72%);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-          mask-composite: exclude;
-  pointer-events: none;
-  z-index: 0;
-}
-:is(.card, .glass, .hero-inner, .stat) > * { position: relative; z-index: 1; }
-body[data-theme="dark"] :is(.card, .glass, .hero-inner, .stat)::before {
-  background: linear-gradient(140deg, rgba(47, 208, 191, 0.62), rgba(47, 208, 191, 0.10) 40%, transparent 70%);
-}
+/* Clean solid borders (no gradient ring) + popup lift on hover */
 
 /* Section title accent underline */
 .section-title { position: relative; }
