@@ -30,49 +30,60 @@ const clips = [
   // --------------------------------------------------------------------
 ];
 
-// Per-video playback cap: only the active slide's iframes load (max 2 at once) -> no lag.
-const PER_SLIDE = 2;
+const PLATFORM_LABEL = {
+  youtube: "YouTube",
+  instagram: "Instagram Reels",
+  tiktok: "TikTok",
+  facebook: "Facebook"
+};
 
-function embedUrl(platform, url) {
-  if (platform === "youtube") {
-    const id = url.includes("youtu.be/")
-      ? url.split("youtu.be/")[1].split(/[?/]/)[0]
-      : (url.match(/shorts\/([^?/]+)/) || url.match(/v=([^?&]+)/) || [])[1];
-    return id ? `https://www.youtube.com/embed/${id}` : "";
+const hasMp4 = (c) => c.mp4 && String(c.mp4).trim() !== "";
+const hasUrl = (c) => c.url && String(c.url).trim() !== "";
+
+function buildMedia(c, lazy) {
+  // Returns HTML for the embed. lazy=true uses data-src so only the active (big) player loads.
+  if (hasMp4(c)) {
+    const src = "videos/" + c.mp4;
+    return lazy
+      ? `<video data-src="${src}" muted loop playsinline preload="none"></video>`
+      : `<video src="${src}" muted loop playsinline preload="metadata"></video>`;
   }
-  if (platform === "tiktok") {
-    return `https://www.tiktok.com/embed/${url.split("/video/")[1].split("?")[0]}`;
-  }
-  if (platform === "instagram") {
-    return `https://www.instagram.com/reel/${url.split("/reel/")[1].split("/")[0]}/embed`;
-  }
-  if (platform === "facebook") {
-    return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=0`;
+  if (hasUrl(c)) {
+    const u = c.url;
+    let embed = "";
+    if (c.platform === "youtube") {
+      const id = u.includes("youtu.be/") ? u.split("youtu.be/")[1].split(/[?/]/)[0]
+        : (u.match(/shorts\/([^?/]+)/) || u.match(/v=([^?&]+)/) || [])[1];
+      if (id) embed = `https://www.youtube.com/embed/${id}`;
+    } else if (c.platform === "tiktok") {
+      const v = u.split("/video/")[1];
+      if (v) embed = `https://www.tiktok.com/embed/${v.split("?")[0]}`;
+    } else if (c.platform === "instagram") {
+      const v = u.split("/reel/")[1];
+      if (v) embed = `https://www.instagram.com/reel/${v.split("/")[0]}/embed`;
+    } else if (c.platform === "facebook") {
+      embed = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(u)}&show_text=0`;
+    }
+    if (!embed) return "";
+    return lazy
+      ? `<iframe data-src="${embed}" allowfullscreen scrolling="no" allow="encrypted-media"></iframe>`
+      : `<iframe src="${embed}" allowfullscreen scrolling="no" allow="encrypted-media"></iframe>`;
   }
   return "";
 }
 
-function placeholderCard(title) {
-  const card = document.createElement("div");
-  card.className = "pf-card";
-  card.innerHTML = `
+function placeholderCardHTML(title) {
+  return `
     <div class="pf-embed"><div class="pf-placeholder">
       <div class="pf-video-box">
-        <div class="pf-play">▶</div>
+        <div class="pf-play">&#9654;</div>
         <span>${title}</span>
       </div>
     </div></div>
     <div class="pf-title">Coming soon</div>`;
-  return card;
 }
 
-function chunk(arr, size) {
-  const out = [];
-  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-  return out;
-}
-
-let currentCarousel = null; // { slides, dots, index }
+let activeClip = null;
 
 function render(filter) {
   const grid = document.getElementById("portfolio-grid");
@@ -85,123 +96,57 @@ function render(filter) {
   const shown = filter && filter !== "all" ? real.filter((c) => c.platform === filter) : real;
 
   if (real.length === 0) {
-    clips.forEach((c) => grid.appendChild(placeholderCard(c.title)));
+    clips.forEach((c) => grid.insertAdjacentHTML("beforeend", `<div class="pf-card">${placeholderCardHTML(c.title)}</div>`));
     if (empty) empty.style.display = "block";
     return;
   }
   if (empty) empty.style.display = "none";
-
   if (shown.length === 0) {
-    const none = document.createElement("p");
-    none.className = "note";
-    none.textContent = "No clips for this platform yet.";
-    grid.appendChild(none);
+    grid.innerHTML = `<p class="note">No clips for this platform yet.</p>`;
     return;
   }
 
-  // Build carousel: PER_SLIDE cards per slide, lazy-load only active slide iframes
-  const slidesData = chunk(shown, PER_SLIDE);
-  const carousel = document.createElement("div");
-  carousel.className = "carousel";
+  // BIG centered player (one video plays at a time = no lag)
+  const big = document.createElement("div");
+  big.className = "pf-big";
+  grid.appendChild(big);
 
-  const track = document.createElement("div");
-  track.className = "carousel-track";
+  // Small thumbnail row
+  const row = document.createElement("div");
+  row.className = "pf-thumbs";
+  grid.appendChild(row);
 
-  slidesData.forEach((pair, i) => {
-    const slide = document.createElement("div");
-    slide.className = "carousel-slide" + (i === 0 ? " active" : "");
-    pair.forEach((c) => {
-      const card = document.createElement("div");
-      card.className = "pf-card";
-      const hasMp4 = c.mp4 && String(c.mp4).trim() !== "";
-      const embed = (c.url && String(c.url).trim() !== "") ? embedUrl(c.platform, c.url) : "";
-      if (hasMp4) {
-        // self-hosted MP4: lazy-load only when slide is active (max 2 videos at once)
-        card.innerHTML = `
-          <div class="pf-embed"><video data-src="videos/${c.mp4}" muted loop playsinline preload="none" poster=""></video></div>
-          <div class="pf-title">${c.title || c.platform + " clip"}</div>`;
-      } else if (embed) {
-        card.innerHTML = `
-          <div class="pf-embed"><iframe data-src="${embed}" allowfullscreen scrolling="no" allow="encrypted-media"></iframe></div>
-          <div class="pf-title">${c.title || c.platform + " clip"}</div>`;
-      } else {
-        card.appendChild(placeholderCard(c.title));
-      }
-      slide.appendChild(card);
-    });
-    track.appendChild(slide);
+  const defaultIdx = 0;
+  shown.forEach((c, i) => {
+    const thumb = document.createElement("button");
+    thumb.className = "pf-thumb" + (i === defaultIdx ? " active" : "");
+    const label = c.title || (PLATFORM_LABEL[c.platform] || c.platform) + " clip";
+    // thumbnails stay lightweight: show a placeholder visual only; real media loads in the big player
+    thumb.innerHTML = `<div class="pf-embed"><div class="pf-placeholder"><div class="pf-video-box"><div class="pf-play">&#9654;</div></div></div></div><span class="pf-thumb-label">${label}</span>`;
+    thumb.addEventListener("click", () => selectClip(shown, i, big, row));
+    row.appendChild(thumb);
   });
 
-  carousel.appendChild(track);
+  selectClip(shown, defaultIdx, big, row);
 
-  // Arrows
-  const prev = document.createElement("button");
-  prev.className = "carousel-btn carousel-prev";
-  prev.setAttribute("aria-label", "Previous");
-  prev.innerHTML = "&#8249;";
-  const next = document.createElement("button");
-  next.className = "carousel-btn carousel-next";
-  next.setAttribute("aria-label", "Next");
-  next.innerHTML = "&#8250;";
-  carousel.appendChild(prev);
-  carousel.appendChild(next);
-
-  // Dots
-  const dots = document.createElement("div");
-  dots.className = "carousel-dots";
-  slidesData.forEach((_, i) => {
-    const dot = document.createElement("button");
-    dot.className = "carousel-dot" + (i === 0 ? " active" : "");
-    dot.setAttribute("aria-label", "Go to slide " + (i + 1));
-    dot.addEventListener("click", () => goToSlide(i));
-    dots.appendChild(dot);
-  });
-  carousel.appendChild(dots);
-
-  grid.appendChild(carousel);
-
-  currentCarousel = { track, dots, index: 0, count: slidesData.length };
-  activateSlide(0);
-
-  prev.addEventListener("click", () => goToSlide((currentCarousel.index - 1 + currentCarousel.count) % currentCarousel.count));
-  next.addEventListener("click", () => goToSlide((currentCarousel.index + 1) % currentCarousel.count));
-
-  // trigger reveal observer for newly added cards
   if (window.__klyptoxReveal) window.__klyptoxReveal();
 }
 
-// Load iframes only for the active slide; unload others to keep playback smooth (max 2 at once)
-function activateSlide(index) {
-  if (!currentCarousel) return;
-  const slides = currentCarousel.track.querySelectorAll(".carousel-slide");
-  slides.forEach((s, i) => s.classList.toggle("active", i === index));
-  currentCarousel.dots.querySelectorAll(".carousel-dot").forEach((d, i) =>
-    d.classList.toggle("active", i === index)
-  );
-  currentCarousel.index = index;
+function selectClip(shown, idx, big, row) {
+  activeClip = shown[idx];
+  // update active thumbnail
+  row.querySelectorAll(".pf-thumb").forEach((t, i) => t.classList.toggle("active", i === idx));
 
-  // lazy: load active slide media, pause/unload inactive ones so max 2 play at once
-  slides.forEach((s, i) => {
-    const media = s.querySelectorAll("iframe[data-src], video[data-src]");
-    if (i === index) {
-      media.forEach((m) => {
-        if (!m.getAttribute("src")) m.setAttribute("src", m.getAttribute("data-src"));
-        if (m.tagName === "VIDEO") { m.play().catch(() => {}); }
-      });
-    } else {
-      media.forEach((m) => {
-        if (m.tagName === "VIDEO") { m.pause(); }
-        if (m.getAttribute("src")) m.removeAttribute("src");
-      });
-    }
-  });
-}
+  const c = shown[idx];
+  const label = c.title || (PLATFORM_LABEL[c.platform] || c.platform) + " clip";
+  const media = buildMedia(c, false); // eager load for the big player
+  big.innerHTML = media
+    ? `<div class="pf-embed pf-embed-big">${media}</div><div class="pf-title">${label}</div>`
+    : placeholderCardHTML(label);
 
-function goToSlide(index) {
-  if (!currentCarousel) return;
-  const count = currentCarousel.count;
-  const idx = ((index % count) + count) % count;
-  activateSlide(idx);
+  // play the video if present
+  const v = big.querySelector("video");
+  if (v) v.play().catch(() => {});
 }
 
 function wireFilters() {
@@ -224,6 +169,6 @@ if (document.readyState === "loading") {
 
 function initPortfolio() {
   window.KLYPTOX_CLIPS = (window.KLYPTOX_CLIPS || clips);
-  render("all"); // build carousel on load
+  render("all");
   wireFilters();
 }
