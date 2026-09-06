@@ -42,7 +42,8 @@ const PLATFORM_LABEL = {
 
 function mediaHTML(c) {
   if (c.mp4 && c.mp4.trim() !== "") {
-    return `<div class="pf-embed"><video src="videos/${c.mp4}" muted loop playsinline preload="metadata"></video></div>`;
+    return `<div class="pf-embed"><video src="videos/${c.mp4}" muted loop playsinline preload="metadata"></video>` +
+      `<button class="pf-mute-btn" type="button" aria-label="Unmute">&#128263;</button></div>`;
   }
   const src = embedUrl(c.platform, c.url);
   if (src) {
@@ -112,7 +113,18 @@ function render(filter) {
   });
 
   // play videos that are present in the newly rendered cards
-  grid.querySelectorAll("video").forEach((v) => v.play().catch(() => {}));
+  grid.querySelectorAll("video").forEach((v) => { v.muted = true; v.play().catch(() => {}); });
+
+  // mute / unmute toggle
+  grid.querySelectorAll(".pf-mute-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const v = btn.closest(".pf-embed").querySelector("video");
+      if (!v) return;
+      v.muted = !v.muted;
+      btn.innerHTML = v.muted ? "&#128263;" : "&#128266;"; // muted : sound
+      if (!v.muted) v.play().catch(() => {});
+    });
+  });
 
   // trigger reveal observer for newly added cards
   if (window.__klyptoxReveal) window.__klyptoxReveal();
