@@ -376,6 +376,7 @@ body[data-theme="dark"] .results-box h3 { color: var(--teal-bright); }
 .contact-item { display: flex; justify-content: space-between; align-items: center; background: var(--surface-solid); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; transition: border-color 0.2s ease, transform 0.2s var(--ease); }
 .contact-item:hover { border-color: var(--teal); transform: translateY(-2px); }
 .contact-item span { color: var(--muted); font-size: 14px; }
+.ci-ig { width: 18px; height: 18px; fill: var(--teal); flex: 0 0 auto; }
 .contact-form { max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
 .contact-form input, .contact-form textarea {
   padding: 13px 16px; border-radius: 12px; border: 1px solid var(--line);
