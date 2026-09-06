@@ -15,7 +15,7 @@
 
 const clips = [
   // ---- PLACEHOLDER CARDS (remove these once real clips are added) ----
-  // YouTube Shorts (slot 1 - self-hosted MP4)
+  // YouTube Shorts (slot 1 — self-hosted MP4)
   { platform: "youtube", mp4: "clip1.mp4", title: "YouTube Shorts 1" },
   { platform: "youtube", mp4: "yt2.mp4", title: "YouTube Shorts 2" },
   // Instagram Reels
@@ -30,60 +30,24 @@ const clips = [
   // --------------------------------------------------------------------
 ];
 
-const PLATFORM_LABEL = {
-  youtube: "YouTube",
-  instagram: "Instagram Reels",
-  tiktok: "TikTok",
-  facebook: "Facebook"
-};
-
-const hasMp4 = (c) => c.mp4 && String(c.mp4).trim() !== "";
-const hasUrl = (c) => c.url && String(c.url).trim() !== "";
-
-function buildMedia(c, lazy) {
-  // Returns HTML for the embed. lazy=true uses data-src so only the active (big) player loads.
-  if (hasMp4(c)) {
-    const src = "videos/" + c.mp4;
-    return lazy
-      ? `<video data-src="${src}" muted loop playsinline preload="none"></video>`
-      : `<video src="${src}" muted loop playsinline preload="metadata"></video>`;
+function embedUrl(platform, url) {
+  if (platform === "youtube") {
+    const id = url.includes("youtu.be/")
+      ? url.split("youtu.be/")[1].split(/[?/]/)[0]
+      : (url.match(/shorts\/([^?/]+)/) || url.match(/v=([^?&]+)/) || [])[1];
+    return id ? `https://www.youtube.com/embed/${id}` : "";
   }
-  if (hasUrl(c)) {
-    const u = c.url;
-    let embed = "";
-    if (c.platform === "youtube") {
-      const id = u.includes("youtu.be/") ? u.split("youtu.be/")[1].split(/[?/]/)[0]
-        : (u.match(/shorts\/([^?/]+)/) || u.match(/v=([^?&]+)/) || [])[1];
-      if (id) embed = `https://www.youtube.com/embed/${id}`;
-    } else if (c.platform === "tiktok") {
-      const v = u.split("/video/")[1];
-      if (v) embed = `https://www.tiktok.com/embed/${v.split("?")[0]}`;
-    } else if (c.platform === "instagram") {
-      const v = u.split("/reel/")[1];
-      if (v) embed = `https://www.instagram.com/reel/${v.split("/")[0]}/embed`;
-    } else if (c.platform === "facebook") {
-      embed = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(u)}&show_text=0`;
-    }
-    if (!embed) return "";
-    return lazy
-      ? `<iframe data-src="${embed}" allowfullscreen scrolling="no" allow="encrypted-media"></iframe>`
-      : `<iframe src="${embed}" allowfullscreen scrolling="no" allow="encrypted-media"></iframe>`;
+  if (platform === "tiktok") {
+    return `https://www.tiktok.com/embed/${url.split("/video/")[1].split("?")[0]}`;
+  }
+  if (platform === "instagram") {
+    return `https://www.instagram.com/reel/${url.split("/reel/")[1].split("/")[0]}/embed`;
+  }
+  if (platform === "facebook") {
+    return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=0`;
   }
   return "";
 }
-
-function placeholderCardHTML(title) {
-  return `
-    <div class="pf-embed"><div class="pf-placeholder">
-      <div class="pf-video-box">
-        <div class="pf-play">&#9654;</div>
-        <span>${title}</span>
-      </div>
-    </div></div>
-    <div class="pf-title">Coming soon</div>`;
-}
-
-let activeClip = null;
 
 function render(filter) {
   const grid = document.getElementById("portfolio-grid");
@@ -96,57 +60,49 @@ function render(filter) {
   const shown = filter && filter !== "all" ? real.filter((c) => c.platform === filter) : real;
 
   if (real.length === 0) {
-    clips.forEach((c) => grid.insertAdjacentHTML("beforeend", `<div class="pf-card">${placeholderCardHTML(c.title)}</div>`));
+    clips.forEach((c) => grid.appendChild(placeholderCard(c.title)));
     if (empty) empty.style.display = "block";
     return;
   }
   if (empty) empty.style.display = "none";
+
   if (shown.length === 0) {
-    grid.innerHTML = `<p class="note">No clips for this platform yet.</p>`;
+    const none = document.createElement("p");
+    none.className = "note";
+    none.textContent = "No clips for this platform yet.";
+    grid.appendChild(none);
     return;
   }
 
-  // BIG centered player (one video plays at a time = no lag)
-  const big = document.createElement("div");
-  big.className = "pf-big";
-  grid.appendChild(big);
-
-  // Small thumbnail row
-  const row = document.createElement("div");
-  row.className = "pf-thumbs";
-  grid.appendChild(row);
-
-  const defaultIdx = 0;
-  shown.forEach((c, i) => {
-    const thumb = document.createElement("button");
-    thumb.className = "pf-thumb" + (i === defaultIdx ? " active" : "");
-    const label = c.title || (PLATFORM_LABEL[c.platform] || c.platform) + " clip";
-    // thumbnails stay lightweight: show a placeholder visual only; real media loads in the big player
-    thumb.innerHTML = `<div class="pf-embed"><div class="pf-placeholder"><div class="pf-video-box"><div class="pf-play">&#9654;</div></div></div></div><span class="pf-thumb-label">${label}</span>`;
-    thumb.addEventListener("click", () => selectClip(shown, i, big, row));
-    row.appendChild(thumb);
+  shown.forEach((c) => {
+    const src = embedUrl(c.platform, c.url);
+    const card = document.createElement("div");
+    card.className = "pf-card";
+    if (src) {
+      card.innerHTML = `
+        <div class="pf-embed"><iframe src="${src}" allowfullscreen scrolling="no" allow="encrypted-media"></iframe></div>
+        <div class="pf-title">${c.title || c.platform + " clip"}</div>`;
+    } else {
+      card.appendChild(placeholderCard(c.title));
+    }
+    grid.appendChild(card);
   });
-
-  selectClip(shown, defaultIdx, big, row);
-
+  // trigger reveal observer for newly added cards
   if (window.__klyptoxReveal) window.__klyptoxReveal();
 }
 
-function selectClip(shown, idx, big, row) {
-  activeClip = shown[idx];
-  // update active thumbnail
-  row.querySelectorAll(".pf-thumb").forEach((t, i) => t.classList.toggle("active", i === idx));
-
-  const c = shown[idx];
-  const label = c.title || (PLATFORM_LABEL[c.platform] || c.platform) + " clip";
-  const media = buildMedia(c, false); // eager load for the big player
-  big.innerHTML = media
-    ? `<div class="pf-embed pf-embed-big">${media}</div><div class="pf-title">${label}</div>`
-    : placeholderCardHTML(label);
-
-  // play the video if present
-  const v = big.querySelector("video");
-  if (v) v.play().catch(() => {});
+function placeholderCard(title) {
+  const card = document.createElement("div");
+  card.className = "pf-card";
+  card.innerHTML = `
+    <div class="pf-embed"><div class="pf-placeholder">
+      <div class="pf-video-box">
+        <div class="pf-play">▶</div>
+        <span>${title}</span>
+      </div>
+    </div></div>
+    <div class="pf-title">Coming soon</div>`;
+  return card;
 }
 
 function wireFilters() {
@@ -162,13 +118,7 @@ function wireFilters() {
 }
 
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initPortfolio);
+  document.addEventListener("DOMContentLoaded", () => { window.KLYPTOX_CLIPS = (window.KLYPTOX_CLIPS || clips); });
 } else {
-  initPortfolio();
-}
-
-function initPortfolio() {
   window.KLYPTOX_CLIPS = (window.KLYPTOX_CLIPS || clips);
-  render("all");
-  wireFilters();
 }
