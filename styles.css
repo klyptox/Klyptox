@@ -332,6 +332,7 @@ a:hover { text-decoration: underline; }
 .pf-card .pf-embed { position: relative; width: 100%; aspect-ratio: 9 / 16; background: var(--surface-200); overflow: hidden; }
 body[data-theme="dark"] .pf-card .pf-embed { background: #1b2426; }
 .pf-card .pf-embed iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.pf-card .pf-embed video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border: 0; background: #000; }
 .pf-card .pf-placeholder { display: flex; align-items: center; justify-content: center; text-align: center; height: 100%; color: var(--muted); font-size: 14px; padding: 16px; }
 .pf-video-box {
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
