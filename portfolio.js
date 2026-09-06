@@ -111,13 +111,18 @@ function render(filter) {
     const slide = document.createElement("div");
     slide.className = "carousel-slide" + (i === 0 ? " active" : "");
     pair.forEach((c) => {
-      const src = embedUrl(c.platform, c.url);
       const card = document.createElement("div");
       card.className = "pf-card";
-      if (src) {
-        // data-src only -> iframe loads when slide becomes active (prevents 8 videos loading at once)
+      const hasMp4 = c.mp4 && String(c.mp4).trim() !== "";
+      const embed = (c.url && String(c.url).trim() !== "") ? embedUrl(c.platform, c.url) : "";
+      if (hasMp4) {
+        // self-hosted MP4: lazy-load only when slide is active (max 2 videos at once)
         card.innerHTML = `
-          <div class="pf-embed"><iframe data-src="${src}" allowfullscreen scrolling="no" allow="encrypted-media"></iframe></div>
+          <div class="pf-embed"><video data-src="videos/${c.mp4}" muted loop playsinline preload="none" poster=""></video></div>
+          <div class="pf-title">${c.title || c.platform + " clip"}</div>`;
+      } else if (embed) {
+        card.innerHTML = `
+          <div class="pf-embed"><iframe data-src="${embed}" allowfullscreen scrolling="no" allow="encrypted-media"></iframe></div>
           <div class="pf-title">${c.title || c.platform + " clip"}</div>`;
       } else {
         card.appendChild(placeholderCard(c.title));
@@ -175,13 +180,19 @@ function activateSlide(index) {
   );
   currentCarousel.index = index;
 
-  // lazy: load active slide iframes, clear inactive ones so they stop playing/loading
+  // lazy: load active slide media, pause/unload inactive ones so max 2 play at once
   slides.forEach((s, i) => {
-    const frames = s.querySelectorAll("iframe[data-src]");
+    const media = s.querySelectorAll("iframe[data-src], video[data-src]");
     if (i === index) {
-      frames.forEach((f) => { if (!f.src) f.src = f.getAttribute("data-src"); });
+      media.forEach((m) => {
+        if (!m.getAttribute("src")) m.setAttribute("src", m.getAttribute("data-src"));
+        if (m.tagName === "VIDEO") { m.play().catch(() => {}); }
+      });
     } else {
-      frames.forEach((f) => { if (f.src) f.removeAttribute("src"); });
+      media.forEach((m) => {
+        if (m.tagName === "VIDEO") { m.pause(); }
+        if (m.getAttribute("src")) m.removeAttribute("src");
+      });
     }
   });
 }
