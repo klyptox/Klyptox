@@ -311,7 +311,7 @@ a:hover { text-decoration: underline; }
 /* ===== Showcase: big centered player + small thumbnail row ===== */
 .pf-big { display: flex; justify-content: center; margin: 6px auto 0; }
 .pf-embed-big {
-  width: 100%; max-width: 380px; margin: 0 auto;
+  width: 100%; max-width: 300px; margin: 0 auto;
   aspect-ratio: 9 / 16; border-radius: 18px; overflow: hidden;
   border: 1px solid var(--line);
   box-shadow: 0 26px 60px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05);
@@ -338,7 +338,7 @@ a:hover { text-decoration: underline; }
 .pf-thumb:hover { transform: translateY(-3px); border-color: rgba(15,155,142,0.4); }
 @media (max-width: 540px) {
   .pf-thumbs { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .pf-embed-big { max-width: 340px; }
+  .pf-embed-big { max-width: 280px; }
 }
 .filter-bar { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 8px 0 26px; }
 .filter-btn {
