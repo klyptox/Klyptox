@@ -15,7 +15,7 @@
 
 const clips = [
   // ---- PLACEHOLDER CARDS (remove these once real clips are added) ----
-  // YouTube Shorts (slot 1 — self-hosted MP4)
+  // YouTube Shorts (slot 1 - self-hosted MP4)
   { platform: "youtube", mp4: "clip1.mp4", title: "YouTube Shorts 1" },
   { platform: "youtube", mp4: "yt2.mp4", title: "YouTube Shorts 2" },
   // Instagram Reels
@@ -29,6 +29,9 @@ const clips = [
   { platform: "tiktok", mp4: "tk2.mp4", title: "TikTok 2" }
   // --------------------------------------------------------------------
 ];
+
+// Per-video playback cap: only the active slide's iframes load (max 2 at once) -> no lag.
+const PER_SLIDE = 2;
 
 function embedUrl(platform, url) {
   if (platform === "youtube") {
@@ -48,6 +51,28 @@ function embedUrl(platform, url) {
   }
   return "";
 }
+
+function placeholderCard(title) {
+  const card = document.createElement("div");
+  card.className = "pf-card";
+  card.innerHTML = `
+    <div class="pf-embed"><div class="pf-placeholder">
+      <div class="pf-video-box">
+        <div class="pf-play">▶</div>
+        <span>${title}</span>
+      </div>
+    </div></div>
+    <div class="pf-title">Coming soon</div>`;
+  return card;
+}
+
+function chunk(arr, size) {
+  const out = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+}
+
+let currentCarousel = null; // { slides, dots, index }
 
 function render(filter) {
   const grid = document.getElementById("portfolio-grid");
@@ -74,35 +99,98 @@ function render(filter) {
     return;
   }
 
-  shown.forEach((c) => {
-    const src = embedUrl(c.platform, c.url);
-    const card = document.createElement("div");
-    card.className = "pf-card";
-    if (src) {
-      card.innerHTML = `
-        <div class="pf-embed"><iframe src="${src}" allowfullscreen scrolling="no" allow="encrypted-media"></iframe></div>
-        <div class="pf-title">${c.title || c.platform + " clip"}</div>`;
-    } else {
-      card.appendChild(placeholderCard(c.title));
-    }
-    grid.appendChild(card);
+  // Build carousel: PER_SLIDE cards per slide, lazy-load only active slide iframes
+  const slidesData = chunk(shown, PER_SLIDE);
+  const carousel = document.createElement("div");
+  carousel.className = "carousel";
+
+  const track = document.createElement("div");
+  track.className = "carousel-track";
+
+  slidesData.forEach((pair, i) => {
+    const slide = document.createElement("div");
+    slide.className = "carousel-slide" + (i === 0 ? " active" : "");
+    pair.forEach((c) => {
+      const src = embedUrl(c.platform, c.url);
+      const card = document.createElement("div");
+      card.className = "pf-card";
+      if (src) {
+        // data-src only -> iframe loads when slide becomes active (prevents 8 videos loading at once)
+        card.innerHTML = `
+          <div class="pf-embed"><iframe data-src="${src}" allowfullscreen scrolling="no" allow="encrypted-media"></iframe></div>
+          <div class="pf-title">${c.title || c.platform + " clip"}</div>`;
+      } else {
+        card.appendChild(placeholderCard(c.title));
+      }
+      slide.appendChild(card);
+    });
+    track.appendChild(slide);
   });
+
+  carousel.appendChild(track);
+
+  // Arrows
+  const prev = document.createElement("button");
+  prev.className = "carousel-btn carousel-prev";
+  prev.setAttribute("aria-label", "Previous");
+  prev.innerHTML = "&#8249;";
+  const next = document.createElement("button");
+  next.className = "carousel-btn carousel-next";
+  next.setAttribute("aria-label", "Next");
+  next.innerHTML = "&#8250;";
+  carousel.appendChild(prev);
+  carousel.appendChild(next);
+
+  // Dots
+  const dots = document.createElement("div");
+  dots.className = "carousel-dots";
+  slidesData.forEach((_, i) => {
+    const dot = document.createElement("button");
+    dot.className = "carousel-dot" + (i === 0 ? " active" : "");
+    dot.setAttribute("aria-label", "Go to slide " + (i + 1));
+    dot.addEventListener("click", () => goToSlide(i));
+    dots.appendChild(dot);
+  });
+  carousel.appendChild(dots);
+
+  grid.appendChild(carousel);
+
+  currentCarousel = { track, dots, index: 0, count: slidesData.length };
+  activateSlide(0);
+
+  prev.addEventListener("click", () => goToSlide((currentCarousel.index - 1 + currentCarousel.count) % currentCarousel.count));
+  next.addEventListener("click", () => goToSlide((currentCarousel.index + 1) % currentCarousel.count));
+
   // trigger reveal observer for newly added cards
   if (window.__klyptoxReveal) window.__klyptoxReveal();
 }
 
-function placeholderCard(title) {
-  const card = document.createElement("div");
-  card.className = "pf-card";
-  card.innerHTML = `
-    <div class="pf-embed"><div class="pf-placeholder">
-      <div class="pf-video-box">
-        <div class="pf-play">▶</div>
-        <span>${title}</span>
-      </div>
-    </div></div>
-    <div class="pf-title">Coming soon</div>`;
-  return card;
+// Load iframes only for the active slide; unload others to keep playback smooth (max 2 at once)
+function activateSlide(index) {
+  if (!currentCarousel) return;
+  const slides = currentCarousel.track.querySelectorAll(".carousel-slide");
+  slides.forEach((s, i) => s.classList.toggle("active", i === index));
+  currentCarousel.dots.querySelectorAll(".carousel-dot").forEach((d, i) =>
+    d.classList.toggle("active", i === index)
+  );
+  currentCarousel.index = index;
+
+  // lazy: load active slide iframes, clear inactive ones so they stop playing/loading
+  slides.forEach((s, i) => {
+    const frames = s.querySelectorAll("iframe[data-src]");
+    if (i === index) {
+      frames.forEach((f) => { if (!f.src) f.src = f.getAttribute("data-src"); });
+    } else {
+      frames.forEach((f) => { if (f.src) f.removeAttribute("src"); });
+    }
+  });
+}
+
+function goToSlide(index) {
+  if (!currentCarousel) return;
+  const count = currentCarousel.count;
+  const idx = ((index % count) + count) % count;
+  activateSlide(idx);
 }
 
 function wireFilters() {
@@ -118,7 +206,13 @@ function wireFilters() {
 }
 
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => { window.KLYPTOX_CLIPS = (window.KLYPTOX_CLIPS || clips); });
+  document.addEventListener("DOMContentLoaded", initPortfolio);
 } else {
+  initPortfolio();
+}
+
+function initPortfolio() {
   window.KLYPTOX_CLIPS = (window.KLYPTOX_CLIPS || clips);
+  render("all"); // build carousel on load
+  wireFilters();
 }

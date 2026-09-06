@@ -307,6 +307,33 @@ a:hover { text-decoration: underline; }
 /* ===================== SHOWCASE ===================== */
 .portfolio-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 10px; }
 .portfolio-grid.all-view .pf-card .pf-embed { aspect-ratio: 9 / 12; }
+
+/* ===== Showcase carousel: 2 videos per slide, lazy-load active slide only ===== */
+.carousel { position: relative; margin-top: 10px; }
+.carousel-track { display: flex; align-items: stretch; }
+.carousel-slide { display: none; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; flex: 0 0 100%; }
+.carousel-slide.active { display: grid; }
+.carousel-btn {
+  position: absolute; top: 42%; transform: translateY(-50%); z-index: 4;
+  width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line);
+  background: var(--glass-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  color: var(--text); font-size: 24px; line-height: 1; cursor: pointer;
+  transition: transform 0.2s var(--ease), border-color 0.2s ease, background 0.2s ease;
+}
+.carousel-btn:hover { transform: translateY(-50%) scale(1.08); border-color: var(--teal); }
+.carousel-prev { left: -8px; }
+.carousel-next { right: -8px; }
+.carousel-dots { display: flex; gap: 8px; justify-content: center; margin-top: 18px; }
+.carousel-dot {
+  width: 10px; height: 10px; border-radius: 50%; border: none; cursor: pointer;
+  background: var(--line); transition: background 0.2s ease, transform 0.2s ease;
+}
+.carousel-dot.active { background: var(--teal); transform: scale(1.2); }
+@media (max-width: 540px) {
+  .carousel-slide { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .carousel-btn { width: 38px; height: 38px; font-size: 20px; }
+  .carousel-prev { left: -4px; } .carousel-next { right: -4px; }
+}
 .filter-bar { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 8px 0 26px; }
 .filter-btn {
   background: var(--glass-bg);
