@@ -15,7 +15,7 @@
 
 const clips = [
   // ---- PLACEHOLDER CARDS (remove these once real clips are added) ----
-  // YouTube Shorts (slot 1 — self-hosted MP4)
+  // YouTube Shorts (slot 1 - self-hosted MP4)
   { platform: "youtube", mp4: "clip1.mp4", title: "YouTube Shorts 1" },
   { platform: "youtube", mp4: "yt2.mp4", title: "YouTube Shorts 2" },
   // Instagram Reels
@@ -30,7 +30,29 @@ const clips = [
   // --------------------------------------------------------------------
 ];
 
+// Show at most this many clips per platform tab (keeps the page light, no lag)
+const MAX_PER_PLATFORM = 2;
+
+const PLATFORM_LABEL = {
+  youtube: "YouTube",
+  instagram: "Instagram Reels",
+  tiktok: "TikTok",
+  facebook: "Facebook"
+};
+
+function mediaHTML(c) {
+  if (c.mp4 && c.mp4.trim() !== "") {
+    return `<div class="pf-embed"><video src="videos/${c.mp4}" muted loop playsinline preload="metadata"></video></div>`;
+  }
+  const src = embedUrl(c.platform, c.url);
+  if (src) {
+    return `<div class="pf-embed"><iframe src="${src}" allowfullscreen scrolling="no" allow="encrypted-media"></iframe></div>`;
+  }
+  return "";
+}
+
 function embedUrl(platform, url) {
+  if (!url) return "";
   if (platform === "youtube") {
     const id = url.includes("youtu.be/")
       ? url.split("youtu.be/")[1].split(/[?/]/)[0]
@@ -38,10 +60,12 @@ function embedUrl(platform, url) {
     return id ? `https://www.youtube.com/embed/${id}` : "";
   }
   if (platform === "tiktok") {
-    return `https://www.tiktok.com/embed/${url.split("/video/")[1].split("?")[0]}`;
+    const v = url.split("/video/")[1];
+    return v ? `https://www.tiktok.com/embed/${v.split("?")[0]}` : "";
   }
   if (platform === "instagram") {
-    return `https://www.instagram.com/reel/${url.split("/reel/")[1].split("/")[0]}/embed`;
+    const v = url.split("/reel/")[1];
+    return v ? `https://www.instagram.com/reel/${v.split("/")[0]}/embed` : "";
   }
   if (platform === "facebook") {
     return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=0`;
@@ -54,13 +78,14 @@ function render(filter) {
   const empty = document.getElementById("portfolio-empty");
   if (!grid) return;
   grid.innerHTML = "";
-  grid.classList.toggle("all-view", !filter || filter === "all");
+  grid.classList.remove("all-view");
 
   const real = clips.filter((c) => c.platform !== "placeholder");
-  const shown = filter && filter !== "all" ? real.filter((c) => c.platform === filter) : real;
+  // No "All" anymore: each tab shows only its own platform, capped at MAX_PER_PLATFORM
+  const shown = real.filter((c) => c.platform === filter).slice(0, MAX_PER_PLATFORM);
 
   if (real.length === 0) {
-    clips.forEach((c) => grid.appendChild(placeholderCard(c.title)));
+    real.forEach((c) => grid.appendChild(placeholderCard(c.title)));
     if (empty) empty.style.display = "block";
     return;
   }
@@ -75,18 +100,20 @@ function render(filter) {
   }
 
   shown.forEach((c) => {
-    const src = embedUrl(c.platform, c.url);
     const card = document.createElement("div");
     card.className = "pf-card";
-    if (src) {
-      card.innerHTML = `
-        <div class="pf-embed"><iframe src="${src}" allowfullscreen scrolling="no" allow="encrypted-media"></iframe></div>
-        <div class="pf-title">${c.title || c.platform + " clip"}</div>`;
+    const media = mediaHTML(c);
+    if (media) {
+      card.innerHTML = media + `<div class="pf-title">${c.title || (PLATFORM_LABEL[c.platform] || c.platform) + " clip"}</div>`;
     } else {
       card.appendChild(placeholderCard(c.title));
     }
     grid.appendChild(card);
   });
+
+  // play videos that are present in the newly rendered cards
+  grid.querySelectorAll("video").forEach((v) => v.play().catch(() => {}));
+
   // trigger reveal observer for newly added cards
   if (window.__klyptoxReveal) window.__klyptoxReveal();
 }
@@ -97,7 +124,7 @@ function placeholderCard(title) {
   card.innerHTML = `
     <div class="pf-embed"><div class="pf-placeholder">
       <div class="pf-video-box">
-        <div class="pf-play">▶</div>
+        <div class="pf-play">&#9654;</div>
         <span>${title}</span>
       </div>
     </div></div>
@@ -118,7 +145,15 @@ function wireFilters() {
 }
 
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => { window.KLYPTOX_CLIPS = (window.KLYPTOX_CLIPS || clips); });
+  document.addEventListener("DOMContentLoaded", initPortfolio);
 } else {
+  initPortfolio();
+}
+
+function initPortfolio() {
   window.KLYPTOX_CLIPS = (window.KLYPTOX_CLIPS || clips);
+  // default to the first platform tab (YouTube) so something shows on load
+  const initial = document.querySelector(".filter-btn.active");
+  render(initial ? initial.dataset.filter : "youtube");
+  wireFilters();
 }
